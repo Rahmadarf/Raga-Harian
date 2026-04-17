@@ -26,51 +26,6 @@ const HealthDashboard: React.FC = () => {
 
     return (
         <div className="flex min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Rubik', sans-serif" }}>
-            {/* Sidebar */}
-            {/* <div
-                className="flex flex-col gap-1.5 flex-shrink-0 w-[220px] min-h-screen p-6 px-4"
-                style={{ background: '#2D3E50' }}
-            >
-                <div
-                    className="flex items-center gap-2 mb-7 text-xl font-bold"
-                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#00A8A8' }}
-                >
-                    <div className="w-2 h-2 rounded-full" style={{ background: '#00A8A8' }} />
-                    HealthPulse
-                </div>
-
-                {navItems.map((item, idx) => (
-                    <div
-                        key={idx}
-                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer text-[13px] font-normal ${item.active
-                            ? 'font-medium text-[#00A8A8]'
-                            : 'text-[#94A3B8]'
-                            }`}
-                        style={item.active ? { background: 'rgba(0, 168, 168, 0.15)' } : {}}
-                    >
-                        <item.icon className="w-4 h-4 flex-shrink-0" />
-                        {item.label}
-                    </div>
-                ))}
-
-                <div
-                    className="mt-auto pt-5 flex flex-col gap-1"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
-                >
-                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer text-[13px] text-[#94A3B8]">
-                        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-                            <path
-                                d="M6 14H3C2.448 14 2 13.552 2 13V3C2 2.448 2.448 2 3 2H6M10 11L14 8L10 5M14 8H6"
-                                stroke="#64748B"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                        Keluar
-                    </div>
-                </div>
-            </div> */}
 
             {/* Main Content */}
             <div className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden overflow-y-auto">
@@ -431,60 +386,32 @@ const HealthDashboard: React.FC = () => {
                     </div>
 
                     {/* Hydration Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
-                        <div
-                            className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
-                            style={{ letterSpacing: '0.8px' }}
-                        >
+                    <div className="rounded-[24px] p-5 border border-[#EEF2F7] bg-white">
+                        <div className="text-[11px] font-medium text-[#94A3B8] uppercase mb-2.5"
+                            style={{ letterSpacing: '0.8px' }}>
                             Hidrasi Harian
                         </div>
 
-                        <div className="flex items-end justify-between">
+                        <div className="flex items-end justify-between mb-3.5">
                             <div>
-                                <div
-                                    className="text-[28px] font-bold text-[#3B82F6]"
-                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                                >
+                                <div className="text-[28px] font-bold text-[#3B82F6] leading-none"
+                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                     1.8 L
                                 </div>
-                                <div className="text-xs text-[#94A3B8] mt-0.5">dari target 2.5 L / hari</div>
+                                <div className="text-[11px] text-text-tertiary mt-1">dari target 2.5 L / hari</div>
                             </div>
-                            <div
-                                className="text-[11px] font-medium text-[#3B82F6] px-2.5 py-1 rounded-[20px]"
-                                style={{ background: '#EFF6FF' }}
-                            >
+                            <div className="text-[11px] font-medium text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-1 rounded-[20px]">
                                 72% tercapai
                             </div>
                         </div>
 
-                        <div className="flex items-end gap-1.5 h-16 my-3">
-                            {[
-                                { h: '100%', t: '07:00' },
-                                { h: '100%', t: '08:30' },
-                                { h: '80%', t: '10:00' },
-                                { h: '60%', t: '11:30' },
-                                { h: '20%', t: '13:00' },
-                                { h: '0%', t: '14:30' },
-                            ].map((bar, i) => (
-                                <div key={i} className="flex-1">
-                                    <div
-                                        className="relative h-16 rounded-md"
-                                        style={{ background: '#DBEAFE' }}
-                                    >
-                                        <div
-                                            className="absolute bottom-0 w-full rounded-md"
-                                            style={{ background: '#3B82F6', height: bar.h }}
-                                        />
-                                    </div>
-                                    <div className="text-[10px] text-[#94A3B8] text-center mt-1">{bar.t}</div>
-                                </div>
-                            ))}
+                        {/* Single progress bar */}
+                        <div className="h-2.5 bg-[#DBEAFE] rounded-full overflow-hidden mb-3.5">
+                            <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: '72%' }} />
                         </div>
 
-                        <button
-                            className="text-white rounded-[10px] px-4 py-2 text-xs font-medium mt-2.5 cursor-pointer"
-                            style={{ background: '#3B82F6', fontFamily: "'Rubik', sans-serif" }}
-                        >
+                        <button className="text-white rounded-[10px] px-4 py-2 text-xs font-medium cursor-pointer"
+                            style={{ background: '#3B82F6', fontFamily: "'Rubik', sans-serif" }}>
                             + Tambah 250 ml
                         </button>
                     </div>

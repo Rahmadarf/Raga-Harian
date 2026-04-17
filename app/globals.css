@@ -51,4 +51,4 @@ body {
   .hp-card {
     @apply bg-white rounded-3xl p-6 border border-[#EEF2F7] shadow-sm hover:shadow-md transition-shadow;
   }
-}
+}

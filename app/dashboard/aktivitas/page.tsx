@@ -5,7 +5,7 @@ import ProgressBar from "@/component/progress-bar"
 
 export default function Activity() {
     return (
-        <div className="flex-1 p-6 pl-60 overflow-y-auto">
+        <div>
             <TopBar title="Aktivitas" subtitle="Senin, 14 April 2026 · Pantau pergerakan harian kamu" />
 
             {/* Banner */}

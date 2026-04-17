@@ -1,4 +1,4 @@
-import Sidebar from "@/component/sidebar/user-dashboard"
+import DoctorSidebar from "@/component/sidebar/doctor-dashboard"
 import "../globals.css"
 import { Plus_Jakarta_Sans, Rubik } from 'next/font/google'
 
@@ -24,7 +24,7 @@ export default function RootLayout({
         >
 
             <body className="min-h-full flex-1 flex-col p-6 pl-60 overflow-y-auto">
-                <Sidebar />
+                <DoctorSidebar />
                 {children}
             </body>
         </html>
