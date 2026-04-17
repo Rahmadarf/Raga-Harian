@@ -1,102 +1,133 @@
+// doctor-dashboard.tsx
 "use client";
 import { usePathname } from "next/navigation";
-import {
-    LayoutGrid, Activity, FileText, Plus, Users, Calendar, MessageSquare, History,
-} from "lucide-react";
+import { LayoutGrid, MessageSquare, Users, Calendar, FileText, Plus } from "lucide-react";
 import Link from "next/link";
-import ProfileCard from "../profile-card";
-
-const navItemss = [
-    { icon: LayoutGrid, href: '/doctor-dashboard', label: 'Dashboard', active: true },
-    { icon: Activity, href: '/doctor-dashboard/chat', label: 'Chat', active: false },
-    { icon: History, href: '/doctor-dashboard/pasien', label: 'Pasien', active: false },
-    { icon: Calendar, href: '/doctor-dashboard/jadwal', label: 'Jadwal', active: false },
-];
 
 const navItems = [
-    { id: 'dashboard', href: '/doctor-dashboard', icon: LayoutGrid, label: 'Overview' },
-    { id: 'chat', href: '/doctor-dashboard/chat', icon: MessageSquare, label: 'Pesan Pasien', badge: '3' },
-    { id: 'patients', href: '/doctor-dashboard/pasien', icon: Users, label: 'Daftar Pasien', badge: '12', badgeType: 'teal' },
-    { id: 'schedule', href: '/doctor-dashboard/jadwal', icon: Calendar, label: 'Jadwal Konsultasi' },
+  { id: "dashboard", href: "/doctor-dashboard", icon: LayoutGrid, label: "Overview" },
+  { id: "chat", href: "/doctor-dashboard/chat", icon: MessageSquare, label: "Pesan Pasien", badge: "3", badgeType: "red" },
+  { id: "patients", href: "/doctor-dashboard/pasien", icon: Users, label: "Daftar Pasien", badge: "12", badgeType: "blue" },
+  { id: "schedule", href: "/doctor-dashboard/jadwal", icon: Calendar, label: "Jadwal Konsultasi" },
 ];
 
 const toolItems = [
-    { id: 'prescription', icon: FileText, label: 'Buat Resep' },
-    { id: 'notes', icon: Plus, label: 'Catatan Medis' },
+  { id: "prescription", icon: FileText, label: "Buat Resep" },
+  { id: "notes", icon: Plus, label: "Catatan Medis" },
 ];
 
 export default function DoctorSidebar() {
+  const url = usePathname();
 
-    const url = usePathname();
+  return (
+    <aside className="fixed top-0 left-0 h-screen w-[220px] bg-secondary border-r border-neutral-100 dark:border-white/[0.06] flex flex-col px-3 py-5 z-50">
+      {/* Logo */}
+      <div className="px-2 mb-1">
+        <span
+          className="text-[17px] font-bold tracking-tight"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
+          <span className="text-teal-600">Raga</span>
+          <span className="text-neutral-800 dark:text-white">Harian</span>
+        </span>
+      </div>
 
-    return (
-        <aside className="fixed top-0 left-0 h-screen w-[230px] bg-secondary flex flex-col gap-1 px-4 py-6 z-50">
-            {/* Logo */}
-            <div
-                className="flex items-center gap-2 text-xl font-bold mb-1 pl-3"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      {/* Portal Badge */}
+      <div className="mx-2 mb-4">
+        <span className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          Portal Dokter
+        </span>
+      </div>
+
+      {/* Section Label */}
+      <p className="text-[9px] font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-600 px-2.5 mb-1">
+        Utama
+      </p>
+
+      {/* Nav */}
+      <nav className="flex flex-col gap-0.5">
+        {navItems.map((item) => {
+          const isActive = url === item.href;
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12.5px] font-medium transition-all select-none ${
+                isActive
+                  ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400"
+                  : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-neutral-800 dark:hover:text-neutral-200"
+              }`}
             >
-                <div className="w-2 h-2 rounded-full bg-primary" />
-                <span className="text-primary">RagaHarian</span>
-            </div>
-            <div className="text-[10px] text-text-secondary font-normal mb-6 pl-4">Portal Dokter</div>
-
-            {/* Section Label - Utama */}
-            <div className="text-[10px] text-text-secondary uppercase tracking-wider px-3 py-2 pb-1 font-medium">Utama</div>
-
-            {/* Navigation Items */}
-            {navItems.map((item) => {
-
-                const isActive = url === item.href;
-
-                return (
-                    <Link
-                        href={item.href}
-                        key={item.id}
-                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer text-[13px] transition-all select-none ${isActive
-                            ? 'font-medium text-primary'
-                            : 'text-text-tertiary hover:bg-white/[0.06] hover:text-text-muted'
-                            }`}
-                        style={isActive ? { background: 'var(--color-primary-alpha)' } : {}}
-                    >
-                        <item.icon className="w-4 h-4 flex-shrink-0" />
-                        {item.label}
-                        {item.badge && (
-                            <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-[20px] ${item.badgeType === 'teal' ? 'bg-primary-alpha text-primary' : 'bg-alert text-white'}`}>
-                                {item.badge}
-                            </span>
-                        )}
-                    </Link>
-                )
-            })}
-
-            {/* Section Label - Alat */}
-            <div className="text-[10px] text-text-secondary uppercase tracking-wider px-3 py-2 pb-1 mt-2 font-medium">Alat</div>
-
-            {/* Tool Items */}
-            {toolItems.map((item) => (
-                <div
-                    key={item.id}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer text-[13px] text-text-tertiary hover:bg-white/[0.06] hover:text-text-muted transition-colors"
+              <span
+                className={`w-[30px] h-[30px] rounded-[8px] flex items-center justify-center flex-shrink-0 ${
+                  isActive
+                    ? "bg-white/70 dark:bg-blue-900/50"
+                    : "bg-neutral-100 dark:bg-white/[0.05]"
+                }`}
+              >
+                <item.icon className="w-3.5 h-3.5" />
+              </span>
+              {item.label}
+              {item.badge && (
+                <span
+                  className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    item.badgeType === "blue"
+                      ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
+                      : "bg-red-500 text-white"
+                  }`}
                 >
-                    <item.icon className="w-4 h-4 flex-shrink-0" />
-                    {item.label}
-                </div>
-            ))}
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
 
-            {/* Bottom Section */}
-            <div className="mt-auto pt-4 flex flex-col gap-1" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                {/* Doctor Profile Card */}
-                <ProfileCard Initial="RP" Name="Dr. Reza Pratama" Online Additional="Sp. Gizi Klinik" />
+      {/* Tools Section */}
+      <p className="text-[9px] font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-600 px-2.5 mt-3 mb-1">
+        Alat
+      </p>
+      <div className="flex flex-col gap-0.5">
+        {toolItems.map((item) => (
+          <button
+            key={item.id}
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12.5px] font-medium text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors w-full"
+          >
+            <span className="w-[30px] h-[30px] rounded-[8px] bg-neutral-100 dark:bg-white/[0.05] flex items-center justify-center flex-shrink-0">
+              <item.icon className="w-3.5 h-3.5" />
+            </span>
+            {item.label}
+          </button>
+        ))}
+      </div>
 
-                {/* Logout */}
-                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer text-[13px] text-text-tertiary hover:text-text-muted transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-                        <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Keluar
-                </div>
-            </div>
-        </aside>
-    );
+      {/* Bottom */}
+      <div className="mt-auto pt-3 border-t border-neutral-100 dark:border-white/[0.06] flex flex-col gap-1">
+        {/* Profile */}
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] border border-neutral-100 dark:border-white/[0.07] bg-neutral-50 dark:bg-white/[0.03] cursor-pointer hover:bg-neutral-100 dark:hover:bg-white/[0.06] transition-colors">
+          <span className="w-8 h-8 rounded-[9px] bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+            RP
+          </span>
+          <div className="min-w-0">
+            <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">
+              Dr. Reza Pratama
+            </p>
+            <p className="text-[10px] text-neutral-400">Sp. Gizi Klinik</p>
+          </div>
+          {/* Online indicator */}
+          <span className="ml-auto w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 ring-2 ring-white dark:ring-neutral-950" />
+        </div>
+
+        {/* Logout */}
+        <button className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12px] text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-red-500 transition-colors w-full">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+            <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Keluar
+        </button>
+      </div>
+    </aside>
+  );
 }
