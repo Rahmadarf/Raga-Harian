@@ -3,7 +3,7 @@ import Tag from "@/component/tag"
 
 export default function History() {
     return (
-        <div className="flex-1 p-6 pl-60 overflow-y-auto">
+        <div>
             <TopBar title="Riwayat Kesehatan" subtitle="Rekam jejak lengkap kondisi kesehatanmu" />
 
             {/* Summary Cards */}
@@ -28,7 +28,7 @@ export default function History() {
                 {/* Table */}
                 <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-base font-bold text-[#1E293B]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        <div className="text-base font-bold text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                             Riwayat Pemeriksaan
                         </div>
                         <div className="flex gap-2">
