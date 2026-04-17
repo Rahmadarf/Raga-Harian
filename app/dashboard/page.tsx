@@ -9,6 +9,9 @@ import {
     Bell,
     Send,
     Info,
+    CloudSun,
+    Hand,
+    Smile,
 } from 'lucide-react';
 
 const HealthDashboard: React.FC = () => {
@@ -25,15 +28,15 @@ const HealthDashboard: React.FC = () => {
         <div className="flex min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Rubik', sans-serif" }}>
 
             {/* Main Content */}
-            <div>
+            <div className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden overflow-y-auto">
                 {/* Topbar */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <div
-                            className="text-[22px] font-bold text-[#1E293B]"
+                            className="flex items-center gap-2 text-[22px] font-bold text-[#1E293B]"
                             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
-                            Selamat pagi, Dimas 👋
+                            Selamat pagi, Dimas <Hand className="w-6 h-6 text-[#F59E0B]" />
                         </div>
                         <div className="text-[13px] text-[#64748B] mt-0.5">
                             Senin, 14 April 2026 · Kondisi kamu hari ini terlihat bagus!
@@ -59,13 +62,10 @@ const HealthDashboard: React.FC = () => {
                 </div>
 
                 {/* Bento Grid */}
-                <div
-                    className="grid gap-5"
-                    style={{ gridTemplateColumns: '1fr 1fr 1fr' }}
-                >
+                <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {/* Health Status Card */}
                     <div
-                        className="col-span-2 rounded-3xl p-5 border border-[#EEF2F7] relative overflow-hidden"
+                        className="md:col-span-2 rounded-3xl p-5 border border-[#EEF2F7] relative overflow-hidden"
                         style={{
                             background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)',
                             color: 'white',
@@ -106,7 +106,7 @@ const HealthDashboard: React.FC = () => {
                             Berdasarkan 4 parameter: BMI, hidrasi, aktivitas & lingkungan
                         </div>
 
-                        <div className="flex gap-4 mt-3.5">
+                        <div className="grid grid-cols-2 lg:flex gap-4 mt-3.5">
                             {[
                                 { val: '22.4', lbl: 'BMI Skor' },
                                 { val: '1.8 L', lbl: 'Hidrasi' },
@@ -132,7 +132,7 @@ const HealthDashboard: React.FC = () => {
 
                     {/* Doctor Chat Card - spans rows */}
                     <div
-                        className="col-start-3 row-start-1 row-span-4 flex flex-col rounded-3xl p-5 border border-[#EEF2F7] bg-white"
+                        className="lg:col-start-3 lg:row-start-1 lg:row-span-4 flex flex-col rounded-3xl p-5 border border-[#EEF2F7] bg-white h-[500px] lg:h-auto"
                     >
                         <div
                             className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
@@ -168,7 +168,7 @@ const HealthDashboard: React.FC = () => {
                                         borderBottomLeftRadius: '4px',
                                     }}
                                 >
-                                    Selamat pagi Dimas! Berdasarkan data terakhirmu, BMI masih di rentang normal. Tetap jaga pola makan ya 🙂
+                                    Selamat pagi Dimas! Berdasarkan data terakhirmu, BMI masih di rentang normal. Tetap jaga pola makan ya <Smile className="inline w-4 h-4 text-[#F59E0B] ml-1" />
                                 </div>
                                 <div className="text-[10px] text-[#94A3B8] mt-0.5 ml-1">08:14</div>
                             </div>
@@ -268,7 +268,7 @@ const HealthDashboard: React.FC = () => {
                             Cuaca Saat Ini
                         </div>
 
-                        <div className="text-4xl mb-1">⛅</div>
+                        <CloudSun className="w-10 h-10 text-[#F59E0B] mb-2" />
 
                         <div
                             className="text-[42px] font-bold text-[#1E293B] leading-none"
