@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap'); */
 
 @import "tailwindcss";
 
@@ -14,19 +14,64 @@
   --font-heading: "Plus Jakarta Sans", sans-serif;
   --font-body: "DM Sans", sans-serif;
 
+  /* Primary Colors */
   --color-primary: #00A8A8;
-  --color-hover: #008E8E;
+  --color-primary-hover: #008E8E;
+  --color-primary-light: rgba(0, 168, 168, 0.1);
+  --color-primary-alpha: rgba(0, 168, 168, 0.18);
+
+  /* Secondary/Sidebar */
   --color-secondary: #2D3E50;
   --color-card: #FFFFFF;
 
+  /* Active States */
+  --color-active: rgba(0, 168, 168, 0.15);
+  --color-active-alpha: rgba(0, 168, 168, 0.06);
+  --color-active-teal: rgba(0, 168, 168, 0.2);
+
+  /* Text Colors */
   --color-text-primary: #0F172A;
   --color-text-secondary: #64748B;
   --color-text-tertiary: #94A3B8;
+  --color-text-muted: #E2E8F0;
 
+  /* Alert/Status Colors */
   --color-alert: #F97316;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
+  --color-purple: #8B5CF6;
 
+  /* Background Colors */
   --color-background: #F8FAFC;
   --color-foreground: #0F172A;
+  --color-surface: #FFFFFF;
+
+  /* Neutral/Gray Scale */
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-300: #CBD5E1;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+  --color-gray-900: #0F172A;
+
+  /* Tag Background Colors */
+  --color-tag-green-bg: #F0FDF4;
+  --color-tag-green-text: #10B981;
+  --color-tag-orange-bg: #FFF7ED;
+  --color-tag-orange-text: #F97316;
+  --color-tag-blue-bg: #EFF6FF;
+  --color-tag-blue-text: #3B82F6;
+  --color-tag-red-bg: #FEF2F2;
+  --color-tag-red-text: #EF4444;
+  --color-tag-teal-bg: rgba(0, 168, 168, 0.1);
+  --color-tag-teal-text: #00A8A8;
+  --color-tag-gray-bg: #F1F5F9;
+  --color-tag-gray-text: #64748B;
 }
 
 @media (prefers-color-scheme: dark) {

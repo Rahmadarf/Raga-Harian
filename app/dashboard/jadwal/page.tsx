@@ -4,7 +4,7 @@ import Tag from "@/component/tag"
 
 export default function Jadwal() {
     return (
-        <div className="flex-1 p-6 pl-60 overflow-y-auto">
+        <div>
             <TopBar title="Jadwal & Pengingat" subtitle="April 2026 · 3 jadwal aktif minggu ini" />
 
             <div className="grid grid-cols-[1.4fr_1fr] gap-5">

@@ -6,7 +6,7 @@ import ProgressBar from "@/component/progress-bar"
 
 export default function Nutrisi() {
     return (
-        <div className="flex-1 p-6 pl-60 overflow-y-auto">
+        <div>
             <TopBar title="Nutrisi" subtitle="Senin, 14 April 2026 · Pantau asupan gizi harianmu" />
 
             {/* Kalori banner */}

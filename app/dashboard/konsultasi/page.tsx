@@ -5,7 +5,7 @@ import Tag from "@/component/tag"
 export default function Konsultasi() {
     return (
 
-        <div className="flex-1 p-6 pl-60 overflow-y-auto">
+        <div>
             <TopBar title="Konsultasi Dokter" subtitle="Hubungi tenaga medis profesional kapan saja" />
 
             <div className="grid grid-cols-[1fr_1.8fr] gap-5">
