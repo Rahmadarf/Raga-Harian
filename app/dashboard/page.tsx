@@ -1,4 +1,7 @@
+"use client"
+
 import React from 'react';
+import TopBar from '@/component/top-banner';
 import {
     LayoutGrid,
     Activity,
@@ -13,6 +16,8 @@ import {
     Hand,
     Smile,
 } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
+import { useEffect, useState } from 'react';
 
 const HealthDashboard: React.FC = () => {
     const navItems = [
@@ -24,48 +29,54 @@ const HealthDashboard: React.FC = () => {
         { icon: MessageSquare, label: 'Konsultasi', active: false },
     ];
 
+    const [userData, setUserData] = useState<any>(null)
+    const supabase = createClient();
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: authData } = await supabase.auth.getUser();
+            if (authData?.user) {
+                const { data: profileView } = await supabase
+                    .from("user_profiles_with_age")
+                    .select("*")
+                    .eq("id", authData.user.id)
+                    .maybeSingle();
+
+                // Simpan data hasil gabungan ke state
+                setUserData({ ...authData.user, ...profileView });
+                setLoading(false)
+            }
+        };
+        fetchUser();
+    }, []);
+
+    const initials = userData?.full_name
+        ?.split(" ")
+        .map((n: string) => n[0])
+        .slice(0, 2)
+        .join("") ?? "?";
+
+    const today = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+
     return (
         <div className="flex min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Rubik', sans-serif" }}>
 
             {/* Main Content */}
-            <div className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden overflow-y-auto">
+            <div className="flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto">
                 {/* Topbar */}
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <div
-                            className="flex items-center gap-2 text-[22px] font-bold text-[#1E293B]"
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            Selamat pagi, Dimas <Hand className="w-6 h-6 text-[#F59E0B]" />
-                        </div>
-                        <div className="text-[13px] text-[#64748B] mt-0.5">
-                            Senin, 14 April 2026 · Kondisi kamu hari ini terlihat bagus!
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div
-                            className="w-[38px] h-[38px] rounded-[10px] bg-white border border-[#E2E8F0] flex items-center justify-center relative cursor-pointer"
-                        >
-                            <Bell className="w-4 h-4 text-[#64748B]" />
-                            <div
-                                className="absolute top-2 right-2 w-[7px] h-[7px] rounded-full border-[1.5px] border-white"
-                                style={{ background: '#F97316' }}
-                            />
-                        </div>
-                        <div
-                            className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white text-sm font-bold"
-                            style={{ background: '#00A8A8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            DK
-                        </div>
-                    </div>
-                </div>
+                <TopBar title={`Selamat pagi, ${userData?.full_name ?? ""}`} />
 
                 {/* Bento Grid */}
                 <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {/* Health Status Card */}
                     <div
-                        className="md:col-span-2 rounded-3xl p-5 border border-[#EEF2F7] relative overflow-hidden"
+                        className="md:col-span-3 rounded-3xl p-5 border border-[#EEF2F7] relative overflow-hidden"
                         style={{
                             background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)',
                             color: 'white',
@@ -127,135 +138,6 @@ const HealthDashboard: React.FC = () => {
                                     <div className="text-[11px] text-white/70">{m.lbl}</div>
                                 </div>
                             ))}
-                        </div>
-                    </div>
-
-                    {/* Doctor Chat Card - spans rows */}
-                    <div
-                        className="lg:col-start-3 lg:row-start-1 lg:row-span-4 flex flex-col rounded-3xl p-5 border border-[#EEF2F7] bg-white h-[500px] lg:h-auto"
-                    >
-                        <div
-                            className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
-                            style={{ letterSpacing: '0.8px' }}
-                        >
-                            Konsultasi Dokter
-                        </div>
-
-                        <div
-                            className="flex items-center gap-2.5 p-3 rounded-[14px] mb-3.5"
-                            style={{ background: '#F8FAFC' }}
-                        >
-                            <div
-                                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-[13px] flex-shrink-0"
-                                style={{ background: '#00A8A8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                            >
-                                DR
-                            </div>
-                            <div className="flex-1">
-                                <div className="font-medium text-sm text-[#1E293B]">Dr. Reza Pratama</div>
-                                <div className="text-[11px] text-[#64748B]">Sp. Gizi Klinik · RSU Bunda</div>
-                            </div>
-                            <div className="w-2 h-2 rounded-full bg-[#10B981] ml-auto" />
-                        </div>
-
-                        <div className="flex-1 flex flex-col gap-2.5 mb-3 overflow-y-auto">
-                            <div>
-                                <div
-                                    className="max-w-[85%] px-3.5 py-2.5 rounded-[16px] text-xs leading-relaxed self-start"
-                                    style={{
-                                        background: '#F1F5F9',
-                                        color: '#1E293B',
-                                        borderBottomLeftRadius: '4px',
-                                    }}
-                                >
-                                    Selamat pagi Dimas! Berdasarkan data terakhirmu, BMI masih di rentang normal. Tetap jaga pola makan ya <Smile className="inline w-4 h-4 text-[#F59E0B] ml-1" />
-                                </div>
-                                <div className="text-[10px] text-[#94A3B8] mt-0.5 ml-1">08:14</div>
-                            </div>
-
-                            <div className="self-end flex flex-col items-end">
-                                <div
-                                    className="max-w-[85%] px-3.5 py-2.5 rounded-[16px] text-xs leading-relaxed self-end"
-                                    style={{
-                                        background: '#00A8A8',
-                                        color: 'white',
-                                        borderBottomRightRadius: '4px',
-                                    }}
-                                >
-                                    Dokter, saya agak pusing dari tadi pagi, kira-kira karena kurang minum ya?
-                                </div>
-                                <div className="text-[10px] text-[#94A3B8] mt-0.5">08:22</div>
-                            </div>
-
-                            <div>
-                                <div
-                                    className="max-w-[85%] px-3.5 py-2.5 rounded-[16px] text-xs leading-relaxed self-start"
-                                    style={{
-                                        background: '#F1F5F9',
-                                        color: '#1E293B',
-                                        borderBottomLeftRadius: '4px',
-                                    }}
-                                >
-                                    Bisa jadi. Data hidrasimu hari ini baru 1.8L dari target 2.5L. Coba minum 2 gelas sekarang dan istirahat sejenak.
-                                </div>
-                                <div className="text-[10px] text-[#94A3B8] mt-0.5 ml-1">08:24</div>
-                            </div>
-
-                            <div className="self-end flex flex-col items-end">
-                                <div
-                                    className="max-w-[85%] px-3.5 py-2.5 rounded-[16px] text-xs leading-relaxed self-end"
-                                    style={{
-                                        background: '#00A8A8',
-                                        color: 'white',
-                                        borderBottomRightRadius: '4px',
-                                    }}
-                                >
-                                    Baik dok, terima kasih!
-                                </div>
-                                <div className="text-[10px] text-[#94A3B8] mt-0.5">08:25</div>
-                            </div>
-
-                            <div className="flex justify-center my-1">
-                                <span
-                                    className="text-[10px] text-[#94A3B8] px-2.5 py-0.5 rounded-[20px]"
-                                    style={{ background: '#F8FAFC' }}
-                                >
-                                    Hari ini
-                                </span>
-                            </div>
-
-                            <div>
-                                <div
-                                    className="max-w-[85%] px-3.5 py-2.5 rounded-[16px] text-xs leading-relaxed self-start"
-                                    style={{
-                                        background: '#F1F5F9',
-                                        color: '#1E293B',
-                                        borderBottomLeftRadius: '4px',
-                                    }}
-                                >
-                                    Jangan lupa cek tekanan darahmu malam ini ya, sesuai jadwal kontrol bulanan.
-                                </div>
-                                <div className="text-[10px] text-[#94A3B8] mt-0.5 ml-1">09:01</div>
-                            </div>
-                        </div>
-
-                        <div
-                            className="flex items-center gap-2 px-2.5 py-2 rounded-[14px] border"
-                            style={{ background: '#F8FAFC', borderColor: '#E2E8F0' }}
-                        >
-                            <div className="flex-1 text-xs text-[#94A3B8]">Tulis pesan...</div>
-                            <div
-                                className="w-[30px] h-[30px] rounded-lg flex items-center justify-center cursor-pointer flex-shrink-0"
-                                style={{ background: '#00A8A8' }}
-                            >
-                                <Send className="w-3.5 h-3.5 text-white" />
-                            </div>
-                        </div>
-
-                        <div className="text-center mt-2.5">
-                            <span className="text-[11px] text-[#94A3B8]">
-                                Respons rata-rata dalam <strong className="text-[#00A8A8]">2 menit</strong>
-                            </span>
                         </div>
                     </div>
 
@@ -492,7 +374,7 @@ const HealthDashboard: React.FC = () => {
                                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                 >
                                     1.840{' '}
-                                    <span className="text-sm font-normal text-[#64748B]">kkal</span>
+                                    <span className="text-sm font-normal text-text-secondary">kkal</span>
                                 </div>
                                 <div className="text-xs text-[#64748B]">dari 2.200 kkal target</div>
                             </div>
