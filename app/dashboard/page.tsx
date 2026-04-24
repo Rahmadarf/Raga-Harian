@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import TopBar from '@/component/top-banner';
 import {
     LayoutGrid,
@@ -18,6 +19,29 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
+
+const containerVariants = {
+    hidden: { opacity: 1 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.12,
+            delayChildren: 0.08,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.65,
+            ease: [0.22, 1, 0.36, 1] as const,
+        },
+    },
+};
 
 const HealthDashboard: React.FC = () => {
     const navItems = [
@@ -65,17 +89,26 @@ const HealthDashboard: React.FC = () => {
     });
 
     return (
-        <div className="flex min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Rubik', sans-serif" }}>
+        <motion.div
+            className="flex min-h-screen bg-[#F8FAFC]"
+            style={{ fontFamily: "'Rubik', sans-serif" }}
+            initial="hidden"
+            animate="show"
+            variants={containerVariants}
+        >
 
             {/* Main Content */}
             <div className="flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto">
                 {/* Topbar */}
-                <TopBar title={`Selamat pagi, ${userData?.full_name ?? ""}`} />
+                <motion.div variants={itemVariants}>
+                    <TopBar title={`Selamat pagi, ${userData?.full_name ?? ""}`} />
+                </motion.div>
 
                 {/* Bento Grid */}
                 <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {/* Health Status Card */}
-                    <div
+                    <motion.div
+                        variants={itemVariants}
                         className="md:col-span-3 rounded-3xl p-5 border border-[#EEF2F7] relative overflow-hidden"
                         style={{
                             background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)',
@@ -124,8 +157,11 @@ const HealthDashboard: React.FC = () => {
                                 { val: '7,240', lbl: 'Langkah' },
                                 { val: '98%', lbl: 'Skor Tidur' },
                             ].map((m, i) => (
-                                <div
+                                <motion.div
                                     key={i}
+                                    initial={{ opacity: 0, y: 18 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.28 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                                     className="rounded-xl px-3.5 py-2"
                                     style={{ background: 'rgba(255, 255, 255, 0.15)' }}
                                 >
@@ -136,13 +172,13 @@ const HealthDashboard: React.FC = () => {
                                         {m.val}
                                     </div>
                                     <div className="text-[11px] text-white/70">{m.lbl}</div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Weather Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
+                    <motion.div variants={itemVariants} className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
                         <div
                             className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
                             style={{ letterSpacing: '0.8px' }}
@@ -189,10 +225,10 @@ const HealthDashboard: React.FC = () => {
                             <Info className="w-3 h-3" />
                             Indeks UV tinggi, gunakan tabir surya saat ke luar.
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* BMI Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
+                    <motion.div variants={itemVariants} className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
                         <div
                             className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
                             style={{ letterSpacing: '0.8px' }}
@@ -265,10 +301,10 @@ const HealthDashboard: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Hydration Card */}
-                    <div className="rounded-[24px] p-5 border border-[#EEF2F7] bg-white">
+                    <motion.div variants={itemVariants} className="rounded-[24px] p-5 border border-[#EEF2F7] bg-white">
                         <div className="text-[11px] font-medium text-[#94A3B8] uppercase mb-2.5"
                             style={{ letterSpacing: '0.8px' }}>
                             Hidrasi Harian
@@ -289,17 +325,22 @@ const HealthDashboard: React.FC = () => {
 
                         {/* Single progress bar */}
                         <div className="h-2.5 bg-[#DBEAFE] rounded-full overflow-hidden mb-3.5">
-                            <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: '72%' }} />
+                            <motion.div
+                                className="h-full bg-[#3B82F6] rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: '72%' }}
+                                transition={{ delay: 0.35, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                            />
                         </div>
 
                         <button className="text-white rounded-[10px] px-4 py-2 text-xs font-medium cursor-pointer"
                             style={{ background: '#3B82F6', fontFamily: "'Rubik', sans-serif" }}>
                             + Tambah 250 ml
                         </button>
-                    </div>
+                    </motion.div>
 
                     {/* Activity Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
+                    <motion.div variants={itemVariants} className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
                         <div
                             className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
                             style={{ letterSpacing: '0.8px' }}
@@ -328,9 +369,12 @@ const HealthDashboard: React.FC = () => {
                                 { h: '10px', bg: '#E2E8F0', day: 'Min', inactive: true },
                             ].map((bar, i) => (
                                 <div key={i} className="flex-1">
-                                    <div
+                                    <motion.div
                                         className="w-full rounded-md"
-                                        style={{ height: bar.h, background: bar.bg }}
+                                        style={{ background: bar.bg }}
+                                        initial={{ height: 0 }}
+                                        animate={{ height: bar.h }}
+                                        transition={{ delay: 0.34 + i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                                     />
                                     <div
                                         className={`text-[10px] text-center mt-1 ${bar.active ? 'text-[#00A8A8] font-semibold' : bar.inactive ? 'text-[#CBD5E1]' : 'text-[#94A3B8]'
@@ -356,10 +400,10 @@ const HealthDashboard: React.FC = () => {
                                 Kalori: 380 kkal
                             </span>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Nutrition Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
+                    <motion.div variants={itemVariants} className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
                         <div
                             className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
                             style={{ letterSpacing: '0.8px' }}
@@ -392,7 +436,13 @@ const HealthDashboard: React.FC = () => {
                                 { color: '#00A8A8', pct: '60%', label: 'Protein', val: '72g', offset: 45 },
                                 { color: '#3B82F6', pct: '50%', label: 'Lemak', val: '38g', offset: 56 },
                             ].map((ring, i) => (
-                                <div key={i} className="text-center">
+                                <motion.div
+                                    key={i}
+                                    className="text-center"
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.38 + i * 0.08, duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+                                >
                                     <svg width="52" height="52" viewBox="0 0 52 52">
                                         <circle cx="26" cy="26" r="20" fill="none" stroke="#F1F5F9" strokeWidth="7" />
                                         <circle
@@ -425,22 +475,27 @@ const HealthDashboard: React.FC = () => {
                                     >
                                         {ring.val}
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
 
-                            <div className="flex-1 ml-2">
+                            <motion.div
+                                className="flex-1 ml-2"
+                                initial={{ opacity: 0, x: 18 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.62, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            >
                                 <div
                                     className="rounded-[10px] px-2.5 py-2 text-[11px] text-[#64748B] leading-relaxed"
                                     style={{ background: '#F8FAFC', lineHeight: '1.6' }}
                                 >
                                     Makan malam ideal dengan sayuran hijau dan protein tanpa lemak untuk memenuhi target.
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
