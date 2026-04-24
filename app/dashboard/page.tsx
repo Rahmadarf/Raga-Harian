@@ -19,6 +19,17 @@ import {
 import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 
+import WeatherCard from '@/component/ui/weather-card';
+
+
+
+interface WeatherData {
+    city: string,
+    temp: number,
+    humadity: number,
+
+}
+
 const HealthDashboard: React.FC = () => {
     const navItems = [
         { icon: LayoutGrid, label: 'Dashboard', active: true },
@@ -30,8 +41,9 @@ const HealthDashboard: React.FC = () => {
     ];
 
     const [userData, setUserData] = useState<any>(null)
-    const supabase = createClient();
+    const [weatherData, setWeatherData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const supabase = createClient();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -49,6 +61,29 @@ const HealthDashboard: React.FC = () => {
             }
         };
         fetchUser();
+    }, []);
+
+
+
+
+    // Weather API
+    useEffect(() => {
+        const fetchWeather = async () => {
+            try {
+                const res = await fetch("/api/weather");
+                const data = await res.json();
+
+                if (res.ok) {
+                    setWeatherData(data);
+                }
+
+            } catch (err) {
+                console.error("Gagal Mengambil Data Cuaca", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchWeather();
     }, []);
 
     const initials = userData?.full_name
@@ -70,7 +105,7 @@ const HealthDashboard: React.FC = () => {
             {/* Main Content */}
             <div className="flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto">
                 {/* Topbar */}
-                <TopBar title={`Selamat pagi, ${userData?.full_name ?? ""}`} />
+                <TopBar title={`Selamat pagi, ${userData?.full_name ?? ""}`} subtitle="Kondisi kamu hari ini terlihat bagus!" />
 
                 {/* Bento Grid */}
                 <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -142,54 +177,7 @@ const HealthDashboard: React.FC = () => {
                     </div>
 
                     {/* Weather Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
-                        <div
-                            className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
-                            style={{ letterSpacing: '0.8px' }}
-                        >
-                            Cuaca Saat Ini
-                        </div>
-
-                        <CloudSun className="w-10 h-10 text-[#F59E0B] mb-2" />
-
-                        <div
-                            className="text-[42px] font-bold text-[#1E293B] leading-none"
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            27°C
-                        </div>
-
-                        <div className="text-[13px] text-[#64748B] mt-1">Berawan sebagian · Karanganyar</div>
-
-                        <div className="flex flex-wrap gap-3 mt-3.5">
-                            <div
-                                className="rounded-[10px] px-2.5 py-1.5 text-xs text-[#475569]"
-                                style={{ background: '#F1F5F9' }}
-                            >
-                                Kelembapan <span className="font-semibold text-[#1E293B]">74%</span>
-                            </div>
-                            <div
-                                className="rounded-[10px] px-2.5 py-1.5 text-xs"
-                                style={{ background: '#F1F5F9' }}
-                            >
-                                UV <span className="font-semibold text-[#F97316]">Tinggi</span>
-                            </div>
-                            <div
-                                className="rounded-[10px] px-2.5 py-1.5 text-xs text-[#475569]"
-                                style={{ background: '#F1F5F9' }}
-                            >
-                                Angin <span className="font-semibold text-[#1E293B]">12 km/j</span>
-                            </div>
-                        </div>
-
-                        <div
-                            className="flex items-center gap-1.5 mt-2.5 rounded-[10px] px-2.5 py-2 text-[11px]"
-                            style={{ background: '#FFF7ED', color: '#F97316' }}
-                        >
-                            <Info className="w-3 h-3" />
-                            Indeks UV tinggi, gunakan tabir surya saat ke luar.
-                        </div>
-                    </div>
+                    <WeatherCard />
 
                     {/* BMI Card */}
                     <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
