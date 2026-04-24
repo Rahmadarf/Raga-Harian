@@ -8,9 +8,10 @@ import { createClient } from "@/utils/supabase/client";
 
 interface TopBarProps {
     title: string;
+    subtitle: string;
 }
 
-const TopBar = ({ title }: TopBarProps) => {
+const TopBar = ({ title, subtitle }: TopBarProps) => {
     const url = usePathname();
     const [userData, setUserData] = useState<any>(null)
     const supabase = createClient();
@@ -56,7 +57,7 @@ const TopBar = ({ title }: TopBarProps) => {
                 >
                     {title}
                 </div>
-                <div className="text-[13px] text-text-secondary mt-0.5">{today} · Kondisi kamu hari ini terlihat bagus!</div>
+                <div className="text-[13px] text-text-secondary mt-0.5">{today} · {subtitle}</div>
             </div>
             <div className="flex items-center gap-3">
                 {url === '/dashboard/history' && (
@@ -78,7 +79,7 @@ const TopBar = ({ title }: TopBarProps) => {
                 )}
                 {loading ? (
                     <div
-                        className="w-[38px] h-[38px] rounded-full bg-neutral-50 dark:bg-neutral-500 skeleton"
+                        className="w-[38px] h-[38px] rounded-full border border-neutral-100 dark:border-white/[0.07] skeleton"
                     />
                 ) : (
                     <div

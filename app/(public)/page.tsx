@@ -3,7 +3,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Activity, Droplets, Brain, MessageCircle, BarChart2, Shield,
-  ChevronRight, Star, ArrowRight, Heart, Zap, Globe, CloudSun, AlertTriangle, Rocket, ClipboardList, CheckCircle,
+  ChevronRight, Star, ArrowRight, Heart, Zap, Globe,
 } from "lucide-react";
 
 const fadeUp = (delay = 0) => ({
@@ -30,9 +30,9 @@ const stats = [
 ];
 
 const testimonials = [
-  { name: "Andi Wijaya", role: "Software Engineer, 28 th", text: "RagaHarian benar-benar mengubah gaya hidup saya. Dalam 3 bulan BMI saya turun dari 27 ke 23, dan saya selalu tahu apa yang harus dimakan.", avatar: "AW", color: "#00A8A8" },
+  { name: "Andi Wijaya", role: "Software Engineer, 28 th", text: "HealthPulse benar-benar mengubah gaya hidup saya. Dalam 3 bulan BMI saya turun dari 27 ke 23, dan saya selalu tahu apa yang harus dimakan.", avatar: "AW", color: "#00A8A8" },
   { name: "Dewi Kusuma", role: "Ibu Rumah Tangga, 35 th", text: "Chat dengan dokter langsung dari HP tanpa antri panjang. Fitur resep digital-nya sangat membantu, tidak perlu takut lupa beli obat.", avatar: "DK", color: "#3B82F6" },
-  { name: "Budi Santoso", role: "Wirausaha, 45 th", text: "Saya punya riwayat hipertensi. Dengan RagaHarian dokter saya bisa pantau tekanan darah saya setiap hari. Ini benar-benar life saver.", avatar: "BS", color: "#8B5CF6" },
+  { name: "Budi Santoso", role: "Wirausaha, 45 th", text: "Saya punya riwayat hipertensi. Dengan HealthPulse dokter saya bisa pantau tekanan darah saya setiap hari. Ini benar-benar life saver.", avatar: "BS", color: "#8B5CF6" },
 ];
 
 const plans = [
@@ -50,7 +50,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#00A8A8]" />
-            <span className="font-heading font-bold text-[20px] text-[#00A8A8]">RagaHarian</span>
+            <span className="font-heading font-bold text-[20px] text-[#00A8A8]">HealthPulse</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[13px] text-[#64748B]">
             <a href="#features" className="hover:text-[#00A8A8] transition-colors">Fitur</a>
@@ -72,7 +72,7 @@ export default function Home() {
             <Zap size={12} /> Platform Kesehatan #1 di Indonesia
           </span>
         </motion.div>
-        <motion.h1 {...fadeUp(0.1)} className="font-heading font-bold text-[36px] md:text-[52px] leading-[1.15] text-[#1E293B] mb-5 max-w-3xl mx-auto">
+        <motion.h1 {...fadeUp(0.1)} className="font-heading font-bold text-[52px] leading-[1.15] text-[#1E293B] mb-5 max-w-3xl mx-auto">
           Kendalikan Kesehatan Kamu{" "}
           <span className="text-[#00A8A8]">Setiap Hari</span>
         </motion.h1>
@@ -80,10 +80,10 @@ export default function Home() {
           Satu dashboard untuk monitoring kesehatan lengkap — cuaca, BMI, hidrasi, nutrisi, aktivitas, dan konsultasi dokter langsung dari genggaman tanganmu.
         </motion.p>
         <motion.div {...fadeUp(0.3)} className="flex items-center justify-center gap-4 flex-wrap">
-          <Link href="/auth/register" className="hp-btn-primary text-[15px] py-3 px-7">
+          <Link href="/auth/register" className="hp-btn-primary text-[15px] py-3 px-7 flex items-center gap-x-2">
             Mulai Gratis Sekarang <ArrowRight size={16} />
           </Link>
-          <Link href="/dashboard" className="hp-btn-outline text-[15px] py-3 px-7">
+          <Link href="/dashboard" className="hp-btn-outline text-[15px] py-3 px-7 flex items-center gap-x-2">
             Lihat Demo <ChevronRight size={16} />
           </Link>
         </motion.div>
@@ -97,13 +97,11 @@ export default function Home() {
         >
           <div className="bg-linear-to-b from-primary/10 to-transparent rounded-[32px] p-6 border border-[#00A8A8]/10">
             {/* Mini dashboard preview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-              <div className="md:col-span-2 bg-linear-to-br from-[#00A8A8] to-[#008E8E] rounded-[20px] p-5 text-white text-left relative overflow-hidden">
+            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto">
+              <div className="col-span-2 bg-linear-to-br from-[#00A8A8] to-[#008E8E] rounded-[20px] p-5 text-white text-left relative overflow-hidden">
                 <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
                 <p className="text-[11px] text-white/60 uppercase tracking-widest mb-2">Status Kesehatan</p>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-heading font-bold text-[28px]">Kondisi Ideal</p><CheckCircle size={24} className="text-[#A7F3D0]"/>
-                </div>
+                <p className="font-heading font-bold text-[28px]">Kondisi Ideal ✓</p>
                 <p className="text-[13px] text-white/75 mt-1">Semua 4 indikator dalam batas normal</p>
                 <div className="flex gap-3 mt-4">
                   {[["22.4", "BMI"], ["1.8L", "Hidrasi"], ["7.2k", "Langkah"]].map(([v, l]) => (
@@ -116,10 +114,10 @@ export default function Home() {
               </div>
               <div className="bg-white rounded-[20px] p-4 border border-[#EEF2F7] text-left">
                 <p className="text-[11px] text-[#94A3B8] uppercase tracking-widest mb-3">Cuaca</p>
-                <CloudSun size={36} className="text-[#F59E0B] mb-2" />
+                <div className="text-[36px]">⛅</div>
                 <p className="font-heading font-bold text-[28px] text-[#1E293B] leading-none">27°C</p>
                 <p className="text-[12px] text-[#64748B] mt-1">Karanganyar</p>
-                <div className="flex items-center gap-1 mt-3 bg-[#FFF7ED] w-max rounded-[8px] px-2 py-1.5 text-[10px] text-[#F97316]"><AlertTriangle size={12} /> UV Tinggi</div>
+                <div className="mt-3 bg-[#FFF7ED] rounded-[8px] px-2 py-1.5 text-[10px] text-[#F97316]">⚠ UV Tinggi</div>
               </div>
               <div className="bg-white rounded-[20px] p-4 border border-[#EEF2F7] text-left">
                 <p className="text-[11px] text-[#94A3B8] uppercase tracking-widest mb-2">Hidrasi</p>
@@ -197,9 +195,9 @@ export default function Home() {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
-              { step: "01", title: "Daftar Gratis", desc: "Buat akun dalam 60 detik. Tidak perlu kartu kredit, langsung bisa digunakan.", icon: <Rocket size={24} className="text-[#00A8A8]" /> },
-              { step: "02", title: "Isi Profil Kesehatan", desc: "Masukkan data dasar seperti berat, tinggi, dan target kesehatan kamu.", icon: <ClipboardList size={24} className="text-[#00A8A8]" /> },
-              { step: "03", title: "Mulai Monitoring", desc: "Dashboard langsung aktif. Pantau kesehatan dan hubungi dokter kapan saja.", icon: <Heart size={24} className="text-[#00A8A8]" /> },
+              { step: "01", title: "Daftar Gratis", desc: "Buat akun dalam 60 detik. Tidak perlu kartu kredit, langsung bisa digunakan.", icon: "🚀" },
+              { step: "02", title: "Isi Profil Kesehatan", desc: "Masukkan data dasar seperti berat, tinggi, dan target kesehatan kamu.", icon: "📋" },
+              { step: "03", title: "Mulai Monitoring", desc: "Dashboard langsung aktif. Pantau kesehatan dan hubungi dokter kapan saja.", icon: "💚" },
             ].map((s, i) => (
               <motion.div key={s.step} {...fadeUp(i * 0.15)} className="text-center">
                 <div className="w-16 h-16 rounded-[20px] bg-[rgba(0,168,168,0.08)] flex items-center justify-center text-[32px] mx-auto mb-5">{s.icon}</div>
@@ -216,7 +214,7 @@ export default function Home() {
       <section id="testimonials" className="max-w-6xl mx-auto px-6 py-20">
         <motion.div {...fadeUp()} className="text-center mb-14">
           <h2 className="font-heading font-bold text-[38px] text-[#1E293B] mb-3">Yang Mereka Rasakan</h2>
-          <p className="text-[16px] text-[#64748B]">Ribuan pengguna telah merasakan manfaat RagaHarian.</p>
+          <p className="text-[16px] text-[#64748B]">Ribuan pengguna telah merasakan manfaat HealthPulse.</p>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {testimonials.map((t, i) => (
@@ -265,7 +263,7 @@ export default function Home() {
                   ))}
                 </div>
                 <Link href="/auth/register"
-                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-full font-medium text-[13px] transition-all ${p.highlight ? "bg-white text-[#00A8A8] hover:bg-white/90" : "bg-[#00A8A8] text-white hover:bg-[#008E8E]"
+                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-[12px] font-medium text-[13px] transition-all ${p.highlight ? "bg-white text-[#00A8A8] hover:bg-white/90" : "bg-[#00A8A8] text-white hover:bg-[#008E8E]"
                     }`}
                 >
                   {p.cta} <ArrowRight size={14} />
@@ -281,7 +279,7 @@ export default function Home() {
         <motion.div {...fadeUp()}>
           <Heart size={40} className="text-[#00A8A8] mx-auto mb-6" />
           <h2 className="font-heading font-bold text-[38px] text-[#1E293B] mb-4">Mulai Hidup Sehat Hari Ini</h2>
-          <p className="text-[16px] text-[#64748B] mb-8 leading-relaxed">Bergabunglah dengan 50.000+ pengguna yang sudah merasakan manfaat monitoring kesehatan harian bersama RagaHarian.</p>
+          <p className="text-[16px] text-[#64748B] mb-8 leading-relaxed">Bergabunglah dengan 50.000+ pengguna yang sudah merasakan manfaat monitoring kesehatan harian bersama HealthPulse.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link href="/auth/register" className="hp-btn-primary text-[15px] py-3 px-8">Daftar Sekarang — Gratis <ArrowRight size={16} /></Link>
             <Link href="/auth/login" className="text-[14px] text-[#64748B] hover:text-[#00A8A8] transition-colors">Sudah punya akun? Masuk →</Link>
@@ -293,10 +291,10 @@ export default function Home() {
       <footer className="border-t border-[#EEF2F7] py-8">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <div/>
-            <span className="font-heading font-bold text-[16px] text-[#00A8A8]">RagaHarian</span>
+            <div className="w-2 h-2 rounded-full bg-[#00A8A8]" />
+            <span className="font-heading font-bold text-[16px] text-[#00A8A8]">HealthPulse</span>
           </div>
-          <p className="text-[12px] text-[#94A3B8]">© 2026 RagaHarian. Semua hak dilindungi.</p>
+          <p className="text-[12px] text-[#94A3B8]">© 2026 HealthPulse. Semua hak dilindungi.</p>
           <div className="flex gap-5 text-[12px] text-[#64748B]">
             <a href="#" className="hover:text-[#00A8A8]">Privasi</a>
             <a href="#" className="hover:text-[#00A8A8]">Syarat</a>
