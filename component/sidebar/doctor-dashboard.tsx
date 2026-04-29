@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { LayoutGrid, MessageSquare, Users, Calendar, FileText, Plus } from "lucide-react";
 import Link from "next/link";
+import MiniProfile from "../miniProfile";
 
 const navItems = [
   { id: "dashboard", href: "/doctor-dashboard", icon: LayoutGrid, label: "Overview" },
@@ -53,29 +54,26 @@ export default function DoctorSidebar() {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12.5px] font-medium transition-all select-none ${
-                isActive
+              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12.5px] font-medium transition-all select-none ${isActive
                   ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400"
                   : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-neutral-800 dark:hover:text-neutral-200"
-              }`}
+                }`}
             >
               <span
-                className={`w-[30px] h-[30px] rounded-[8px] flex items-center justify-center flex-shrink-0 ${
-                  isActive
+                className={`w-[30px] h-[30px] rounded-[8px] flex items-center justify-center flex-shrink-0 ${isActive
                     ? "bg-white/70 dark:bg-blue-900/50"
                     : "bg-neutral-100 dark:bg-white/[0.05]"
-                }`}
+                  }`}
               >
                 <item.icon className="w-3.5 h-3.5" />
               </span>
               {item.label}
               {item.badge && (
                 <span
-                  className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                    item.badgeType === "blue"
+                  className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.badgeType === "blue"
                       ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
                       : "bg-red-500 text-white"
-                  }`}
+                    }`}
                 >
                   {item.badge}
                 </span>
@@ -106,19 +104,7 @@ export default function DoctorSidebar() {
       {/* Bottom */}
       <div className="mt-auto pt-3 border-t border-neutral-100 dark:border-white/[0.06] flex flex-col gap-1">
         {/* Profile */}
-        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] border border-neutral-100 dark:border-white/[0.07] bg-neutral-50 dark:bg-white/[0.03] cursor-pointer hover:bg-neutral-100 dark:hover:bg-white/[0.06] transition-colors">
-          <span className="w-8 h-8 rounded-[9px] bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-            RP
-          </span>
-          <div className="min-w-0">
-            <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">
-              Dr. Reza Pratama
-            </p>
-            <p className="text-[10px] text-neutral-400">Sp. Gizi Klinik</p>
-          </div>
-          {/* Online indicator */}
-          <span className="ml-auto w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 ring-2 ring-white dark:ring-neutral-950" />
-        </div>
+        <MiniProfile />
 
         {/* Logout */}
         <button className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12px] text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-red-500 transition-colors w-full">

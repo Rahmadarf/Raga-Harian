@@ -2,6 +2,7 @@ import TopBar from "@/component/top-banner"
 import BannerChip from "@/component/banner-chip"
 import Tag from "@/component/tag"
 import ProgressBar from "@/component/progress-bar"
+import Banner from "@/component/banner"
 
 export default function Activity() {
     return (
@@ -9,29 +10,20 @@ export default function Activity() {
             <TopBar title="Aktivitas" subtitle="Senin, 14 April 2026 · Pantau pergerakan harian kamu" />
 
             {/* Banner */}
-            <div
-                className="rounded-3xl p-6 px-7 text-white relative overflow-hidden mb-5"
-                style={{ background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)' }}
-            >
-                <div className="absolute -top-[30px] -right-5 w-[130px] h-[130px] rounded-full bg-white/[0.08]" />
-                <div className="absolute -bottom-[40px] right-20 w-[90px] h-[90px] rounded-full bg-white/[0.06]" />
-
-                <div className="text-[11px] font-medium uppercase tracking-wider mb-2 text-white/60">Ringkasan Hari Ini</div>
-                <div className="text-[28px] font-bold text-white mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                    7.240 Langkah
-                </div>
-                <div className="text-[13px] text-white/75">72% dari target harian 10.000 langkah · Terus semangat!</div>
-
-                <div className="flex flex-wrap gap-3 mt-4">
-                    <BannerChip val='380' lbl='Kalori Terbakar' />
-                    <BannerChip val='4.2 km' lbl='Jarak Tempuh' />
-                    <BannerChip val='52 mnt' lbl='Aktif Bergerak' />
-                    <BannerChip val='68 bpm' lbl='Detak Jantung' />
-                </div>
-            </div>
+            <Banner
+                title="Ringkasan Hari ini"
+                value="7.240 Langkah / 10.000 Langkah"
+                subtext="72% dari target harian · Terus semangat!"
+                chips={[
+                    { value: '380 kkal', label: 'Kalori Terbakar' },
+                    { value: '4.2 km', label: 'Jarak Tempuh' },
+                    { value: '52 mnt', label: 'Aktif Bergerak' },
+                    { value: '68 bpm', label: 'Detak Jantung' },
+                ]}
+            />
 
             {/* Stats + Chart */}
-            <div className="grid grid-cols-[1fr_2fr] gap-5 mb-5">
+            <div className="grid grid-cols-[1fr_2fr] gap-5 mb-5 mt-5">
                 {/* Stats Left */}
                 <div className="flex flex-col gap-3.5">
                     <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">

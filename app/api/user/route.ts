@@ -15,9 +15,9 @@ export async function GET() {
         }
 
         const { data: profile, error: dbError } = await supabase
-            .from('user_profiles_with_age')
+            .from('profiles')
             .select('*')
-            .eq('id', user.id)
+            .eq('user_id', user.id)
             .maybeSingle()
 
         if (dbError) {
@@ -29,7 +29,7 @@ export async function GET() {
             fullName: profile.full_name,
             firstName: profile.first_name,
             lastName: profile.last_name,
-            age: profile.current_age,
+            age: profile.age,
         })
     } catch (error) {
         return NextResponse.json({

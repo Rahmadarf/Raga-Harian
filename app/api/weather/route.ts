@@ -9,8 +9,17 @@ export async function GET(req: NextRequest) {
 
 
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latHeader}&longitude=${lonHeader}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,is_day&daily=uv_index_max&timezone=auto&forecast_days=1`;
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+
     try {
-        const response = await fetch(url)
+
+        const response = await fetch(url, { signal: controller.signal })
+        clearTimeout(timeoutId)
+
+        if (!response.ok) throw new Error("Gagal Mengambil Data Cuaca")
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -64,7 +73,22 @@ export async function GET(req: NextRequest) {
             city: city,
         });
 
-    } catch (error) {
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    } catch (error: any) {
+        clearTimeout(timeoutId);
+        console.error("Weather Fetch Error:", error.name);
+
+        return NextResponse.json({
+            current: {
+                temp: 27,
+                humidity: 80,
+                uvi: { label: "N/A", bg: "bg-gray-50", color: "text-gray-400" },
+                weatherCode: 1,
+                icon: "01d",
+                desc: "Data tidak tersedia",
+                wind: 0,
+            },
+            city: city,
+            isFallback: true // Penanda untuk frontend jika perlu
+        }, { status: 200 }); // Kirim 200 agar frontend tidak error
     }
 }

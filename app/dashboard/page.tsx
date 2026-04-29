@@ -20,6 +20,12 @@ import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 
 import WeatherCard from '@/component/ui/weather-card';
+import BmiCard from '@/component/ui/bmi-card';
+import HydrationCard from '@/component/ui/hydration-card';
+
+import { useDashboard } from '@/context/DashboardProvider';
+
+import Banner from '@/component/banner';
 
 
 
@@ -40,53 +46,9 @@ const HealthDashboard: React.FC = () => {
         { icon: MessageSquare, label: 'Konsultasi', active: false },
     ];
 
-    const [userData, setUserData] = useState<any>(null)
-    const [weatherData, setWeatherData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient();
+    const { user, health, waterToday } = useDashboard()
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const { data: authData } = await supabase.auth.getUser();
-            if (authData?.user) {
-                const { data: profileView } = await supabase
-                    .from("user_profiles_with_age")
-                    .select("*")
-                    .eq("id", authData.user.id)
-                    .maybeSingle();
-
-                // Simpan data hasil gabungan ke state
-                setUserData({ ...authData.user, ...profileView });
-                setLoading(false)
-            }
-        };
-        fetchUser();
-    }, []);
-
-
-
-
-    // Weather API
-    useEffect(() => {
-        const fetchWeather = async () => {
-            try {
-                const res = await fetch("/api/weather");
-                const data = await res.json();
-
-                if (res.ok) {
-                    setWeatherData(data);
-                }
-
-            } catch (err) {
-                console.error("Gagal Mengambil Data Cuaca", err);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchWeather();
-    }, []);
-
-    const initials = userData?.full_name
+    const initials = user?.fullName
         ?.split(" ")
         .map((n: string) => n[0])
         .slice(0, 2)
@@ -105,186 +67,30 @@ const HealthDashboard: React.FC = () => {
             {/* Main Content */}
             <div className="flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto">
                 {/* Topbar */}
-                <TopBar title={`Selamat pagi, ${userData?.full_name ?? ""}`} subtitle="Kondisi kamu hari ini terlihat bagus!" />
+                <TopBar title={`Selamat pagi, ${user?.fullName ?? ""}`} subtitle="Kondisi kamu hari ini terlihat bagus!" />
+
+                <Banner
+                    title='Status Kesehatan Hari Ini'
+                    value='Kondisi Ideal'
+                    subtext='Berdasarkan 3 parameter: BMI, hidrasi & aktivitas'
+                    chips={[
+                        { value: `${health?.bmi.toFixed(1)}`, label: 'BMI Skor' },
+                        { value: `${waterToday / 1000} liter`, label: 'Hidrasi' },
+                        { value: '7,240', label: 'Langkah' },
+                    ]}
+                />
 
                 {/* Bento Grid */}
                 <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Health Status Card */}
-                    <div
-                        className="md:col-span-3 rounded-3xl p-5 border border-[#EEF2F7] relative overflow-hidden"
-                        style={{
-                            background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)',
-                            color: 'white',
-                        }}
-                    >
-                        <div
-                            className="absolute -top-[30px] -right-[30px] w-[120px] h-[120px] rounded-full"
-                            style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-                        />
-                        <div
-                            className="absolute -bottom-[40px] right-[60px] w-[90px] h-[90px] rounded-full"
-                            style={{ background: 'rgba(255, 255, 255, 0.06)' }}
-                        />
-
-                        <div
-                            className="text-[11px] font-medium uppercase tracking-wider mb-2.5"
-                            style={{ color: 'rgba(255,255,255,0.6)', letterSpacing: '0.8px' }}
-                        >
-                            Status Kesehatan Hari Ini
-                        </div>
-
-                        <div
-                            className="inline-flex items-center gap-1.5 rounded-[20px] px-3.5 py-1.5 text-[13px] font-medium text-white mb-4"
-                            style={{ background: 'rgba(255, 255, 255, 0.2)' }}
-                        >
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#A7F3D0]" />
-                            Semua indikator normal
-                        </div>
-
-                        <div
-                            className="text-[32px] font-bold text-white mb-1"
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            Kondisi Ideal
-                        </div>
-
-                        <div className="text-[13px] text-white/75">
-                            Berdasarkan 4 parameter: BMI, hidrasi, aktivitas & lingkungan
-                        </div>
-
-                        <div className="grid grid-cols-2 lg:flex gap-4 mt-3.5">
-                            {[
-                                { val: '22.4', lbl: 'BMI Skor' },
-                                { val: '1.8 L', lbl: 'Hidrasi' },
-                                { val: '7,240', lbl: 'Langkah' },
-                                { val: '98%', lbl: 'Skor Tidur' },
-                            ].map((m, i) => (
-                                <div
-                                    key={i}
-                                    className="rounded-xl px-3.5 py-2"
-                                    style={{ background: 'rgba(255, 255, 255, 0.15)' }}
-                                >
-                                    <div
-                                        className="text-lg font-bold text-white"
-                                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                                    >
-                                        {m.val}
-                                    </div>
-                                    <div className="text-[11px] text-white/70">{m.lbl}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* Weather Card */}
                     <WeatherCard />
 
                     {/* BMI Card */}
-                    <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
-                        <div
-                            className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2.5"
-                            style={{ letterSpacing: '0.8px' }}
-                        >
-                            Indeks Massa Tubuh (BMI)
-                        </div>
-
-                        <div
-                            className="text-[38px] font-bold text-[#00A8A8]"
-                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            22.4
-                        </div>
-
-                        <div
-                            className="inline-block text-[13px] font-medium text-[#10B981] rounded-[20px] px-2.5 py-0.5 mt-1"
-                            style={{ background: '#D1FAE5' }}
-                        >
-                            Normal / Ideal
-                        </div>
-
-                        <div className="mt-3.5">
-                            <div
-                                className="relative h-2.5 rounded-[99px]"
-                                style={{
-                                    background: 'linear-gradient(to right, #93C5FD, #10B981, #F97316, #EF4444)',
-                                }}
-                            >
-                                <div
-                                    className="absolute -top-[3px] w-4 h-4 bg-white rounded-full border-[2.5px] border-[#00A8A8]"
-                                    style={{ left: '41%', transform: 'translateX(-50%)' }}
-                                />
-                            </div>
-                            <div className="flex justify-between text-[10px] text-[#94A3B8] mt-1">
-                                <span>Kurus</span>
-                                <span>Normal</span>
-                                <span>Gemuk</span>
-                                <span>Obese</span>
-                            </div>
-                        </div>
-
-                        <div className="h-px bg-[#F1F5F9] my-3" />
-
-                        <div className="flex gap-3 mt-2">
-                            <div className="flex-1">
-                                <div className="text-[11px] text-[#94A3B8]">Berat Badan</div>
-                                <div
-                                    className="text-base font-bold text-[#1E293B]"
-                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                                >
-                                    68 <span className="text-xs text-[#64748B] font-normal">kg</span>
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-[11px] text-[#94A3B8]">Tinggi Badan</div>
-                                <div
-                                    className="text-base font-bold text-[#1E293B]"
-                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                                >
-                                    174 <span className="text-xs text-[#64748B] font-normal">cm</span>
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-[11px] text-[#94A3B8]">Target</div>
-                                <div
-                                    className="text-base font-bold text-[#00A8A8]"
-                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                                >
-                                    65 <span className="text-xs text-[#64748B] font-normal">kg</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <BmiCard />
 
                     {/* Hydration Card */}
-                    <div className="rounded-[24px] p-5 border border-[#EEF2F7] bg-white">
-                        <div className="text-[11px] font-medium text-[#94A3B8] uppercase mb-2.5"
-                            style={{ letterSpacing: '0.8px' }}>
-                            Hidrasi Harian
-                        </div>
-
-                        <div className="flex items-end justify-between mb-3.5">
-                            <div>
-                                <div className="text-[28px] font-bold text-[#3B82F6] leading-none"
-                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                                    1.8 L
-                                </div>
-                                <div className="text-[11px] text-text-tertiary mt-1">dari target 2.5 L / hari</div>
-                            </div>
-                            <div className="text-[11px] font-medium text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-1 rounded-[20px]">
-                                72% tercapai
-                            </div>
-                        </div>
-
-                        {/* Single progress bar */}
-                        <div className="h-2.5 bg-[#DBEAFE] rounded-full overflow-hidden mb-3.5">
-                            <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: '72%' }} />
-                        </div>
-
-                        <button className="text-white rounded-[10px] px-4 py-2 text-xs font-medium cursor-pointer"
-                            style={{ background: '#3B82F6', fontFamily: "'Rubik', sans-serif" }}>
-                            + Tambah 250 ml
-                        </button>
-                    </div>
+                    <HydrationCard />
 
                     {/* Activity Card */}
                     <div className="rounded-3xl p-5 border border-[#EEF2F7] bg-white">
