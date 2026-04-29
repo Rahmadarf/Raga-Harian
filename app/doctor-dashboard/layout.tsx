@@ -2,6 +2,8 @@ import DoctorSidebar from "@/component/sidebar/doctor-dashboard"
 import "../globals.css"
 import { Plus_Jakarta_Sans, Rubik } from 'next/font/google'
 
+import { DashboardProvider } from "@/context/DashboardProvider"
+
 const jakarta = Plus_Jakarta_Sans({
     subsets: ['latin'],
     variable: '--font-heading',
@@ -24,8 +26,10 @@ export default function RootLayout({
         >
 
             <body className="min-h-full flex-1 flex-col p-6 pl-60 overflow-y-auto">
-                <DoctorSidebar />
-                {children}
+                <DashboardProvider>
+                    <DoctorSidebar />
+                    {children}
+                </DashboardProvider>
             </body>
         </html>
     );

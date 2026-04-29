@@ -1,6 +1,6 @@
 import Tag from "@/component/tag"
 import TopBar from "@/component/top-banner"
-import BannerChip from "@/component/banner-chip"
+import Banner from "@/component/banner"
 import ProgressBar from "@/component/progress-bar"
 
 
@@ -10,47 +10,20 @@ export default function Nutrisi() {
             <TopBar title="Nutrisi" subtitle="Senin, 14 April 2026 · Pantau asupan gizi harianmu" />
 
             {/* Kalori banner */}
-            <div
-                className="rounded-3xl p-6 text-white relative overflow-hidden mb-5"
-                style={{ background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)' }}
-            >
-                <div className="absolute -top-[30px] -right-5 w-[130px] h-[130px] rounded-full bg-white/8" />
-                <div className="absolute -bottom-[40px] right-20 w-[90px] h-[90px] rounded-full bg-white/6" />
+            <Banner
+                title="Kalori Hari Ini"
+                value="1.840 / 2.200 kkal"
+                subtext="360 kkal tersisa · Makan malam tersedia"
+                chips={[
+                    { value: '210g', label: 'Karbohidrat' },
+                    { value: '72g', label: 'Protein' },
+                    { value: '38g', label: 'Lemak' },
+                    { value: '24g', label: 'Serat' },
+                ]}
+                percentage={84}
+            />
 
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                        <div className="text-[11px] font-medium uppercase tracking-wider mb-2 text-white/60"
-                            style={{ letterSpacing: '0.8px' }}
-                        >
-                            Kalori Hari Ini
-                        </div>
-                        <div className="text-[28px] font-bold text-white mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            1.840 / 2.200 kkal
-                        </div>
-                        <div className="text-[13px] text-white/75">360 kkal tersisa · Makan malam tersedia</div>
-                    </div>
-                    <div className="w-20 h-20 relative shrink-0">
-                        <svg viewBox="0 0 80 80" className="w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
-                            <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="10" />
-                            <circle cx="40" cy="40" r="32" fill="none" stroke="white" strokeWidth="10" strokeDasharray="201" strokeDashoffset="42" strokeLinecap="round" />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                        >
-                            84%
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3 mt-4">
-                    <BannerChip val="210g" lbl="Karbohidrat" />
-                    <BannerChip val="72g" lbl="Protein" />
-                    <BannerChip val="38g" lbl="Lemak" />
-                    <BannerChip val="24g" lbl="Serat" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-[1.2fr_1fr] gap-5">
+            <div className="grid grid-cols-[1.2fr_1fr] gap-5 mt-5">
                 {/* Log makanan */}
                 <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
                     <div className="text-base font-bold text-[#1E293B] mb-3.5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>

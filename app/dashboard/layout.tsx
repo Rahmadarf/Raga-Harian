@@ -7,6 +7,8 @@ import { Plus_Jakarta_Sans, Rubik } from 'next/font/google'
 import { createClient } from "@/utils/supabase/client"
 import { useEffect, useState } from "react"
 
+import { DashboardProvider } from "@/context/DashboardProvider"
+
 const jakarta = Plus_Jakarta_Sans({
     subsets: ['latin'],
     variable: '--font-heading',
@@ -32,8 +34,11 @@ export default function RootLayout({
         >
 
             <body className="min-h-full flex-1 flex-col p-6 pl-60 w-full overflow-y-auto bg-[#F8FAFC]">
-                <Sidebar />
-                {children}
+                <DashboardProvider>
+                    <Sidebar />
+                    {children}
+                </DashboardProvider>
+
             </body>
         </html>
     );

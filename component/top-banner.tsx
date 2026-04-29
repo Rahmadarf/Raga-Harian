@@ -1,9 +1,11 @@
 "use client"
 
 import { usePathname } from "next/navigation";
-import { Download, Bell } from 'lucide-react'
+import { Plus, Bell } from 'lucide-react'
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+
+import { useDashboard } from "@/context/DashboardProvider";
 
 
 interface TopBarProps {
@@ -13,29 +15,9 @@ interface TopBarProps {
 
 const TopBar = ({ title, subtitle }: TopBarProps) => {
     const url = usePathname();
-    const [userData, setUserData] = useState<any>(null)
-    const supabase = createClient();
-    const [loading, setLoading] = useState(true)
+    const { loading, user } = useDashboard()
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const { data: authData } = await supabase.auth.getUser();
-            if (authData?.user) {
-                const { data: profileView } = await supabase
-                    .from("user_profiles_with_age")
-                    .select("*")
-                    .eq("id", authData.user.id)
-                    .maybeSingle();
-
-                // Simpan data hasil gabungan ke state
-                setUserData({ ...authData.user, ...profileView });
-                setLoading(false);
-            }
-        };
-        fetchUser();
-    }, []);
-
-    const initials = userData?.full_name
+    const initials = user?.fullName
         ?.split(" ")
         .map((n: string) => n[0])
         .slice(0, 2)
@@ -47,6 +29,29 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
         month: 'long',
         year: 'numeric',
     });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-between mb-7 animate-pulse">
+                {/* Sisi Kiri: Title & Subtitle */}
+                <div>
+                    {/* Title Skeleton */}
+                    <div className="h-7 w-48 bg-neutral-200 rounded-lg mb-2" />
+                    {/* Subtitle Skeleton */}
+                    <div className="h-4 w-36 bg-neutral-100 rounded-md" />
+                </div>
+
+                {/* Sisi Kanan: Action Items */}
+                <div className="flex items-center gap-3">
+                    {/* Button/Notification Icon Skeleton */}
+                    <div className="w-[38px] h-[38px] rounded-[10px] bg-neutral-100 border border-neutral-50" />
+
+                    {/* Profile Avatar Skeleton */}
+                    <div className="w-[38px] h-[38px] rounded-full bg-neutral-200" />
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="flex items-center justify-between mb-7">
@@ -60,16 +65,25 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
                 <div className="text-[13px] text-text-secondary mt-0.5">{today} · {subtitle}</div>
             </div>
             <div className="flex items-center gap-3">
-                {url === '/dashboard/history' && (
+                {url === '/dashboard/nutrisi' && (
                     <button
-                        className="inline-flex items-center gap-1.5 text-primary border-[1.5px] border-primary rounded-xl px-4 py-2.5 text-[13px] font-medium bg-white"
+                        className="inline-flex items-center gap-1.5 text-white cursor-pointer border-[1.5px] border-primary rounded-xl px-4 py-2.5 text-[13px] font-medium bg-primary"
                         style={{ fontFamily: "'Rubik', sans-serif" }}
                     >
-                        <Download className="w-4 h-4" />
-                        Unduh Laporan
+                        <Plus className="w-4 h-4" />
+                        Tambah Makanan
                     </button>
                 )}
-                {url !== '/dashboard/history' && (
+                {url === '/dashboard/konsultasi' && (
+                    <button
+                        className="inline-flex items-center gap-1.5 text-white cursor-pointer border-[1.5px] border-primary rounded-xl px-4 py-2.5 text-[13px] font-medium bg-primary"
+                        style={{ fontFamily: "'Rubik', sans-serif" }}
+                    >
+                        <Plus className="w-4 h-4" />
+                        Konsultasi Baru
+                    </button>
+                )}
+                {url !== '/dashboard/nutrisi' && (
                     <div className="w-[38px] h-[38px] rounded-[10px] bg-white border border-gray-200 flex items-center justify-center relative cursor-pointer">
                         <Bell className="w-4 h-4 text-text-secondary" />
                         <div

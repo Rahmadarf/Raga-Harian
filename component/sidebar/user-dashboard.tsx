@@ -9,12 +9,13 @@ import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useDashboard } from "@/context/DashboardProvider";
+import MiniProfile from "../miniProfile";
+
 const navItems = [
     { id: "dashboard", icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
     { id: "aktivitas", icon: Activity, href: "/dashboard/aktivitas", label: "Aktivitas" },
-    { id: "riwayat", icon: History, href: "/dashboard/history", label: "Riwayat" },
     { id: "nutrisi", icon: Droplets, href: "/dashboard/nutrisi", label: "Nutrisi" },
-    { id: "jadwal", icon: Calendar, href: "/dashboard/jadwal", label: "Jadwal" },
     { id: "konsultasi", icon: MessageSquare, href: "/dashboard/konsultasi", label: "Konsultasi" },
 ];
 
@@ -22,29 +23,8 @@ export default function UserSidebar() {
     const url = usePathname();
     const goTo = useRouter()
     const supabase = createClient();
-    const [userData, setUserData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const { user, loading } = useDashboard();
 
-    useEffect(() => {
-
-        const fetchUserData = async () => {
-            try {
-                const res = await fetch('/api/user');
-                const data = await res.json();
-
-                if (res.ok) {
-                    setUserData(data);
-                }
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchUserData();
-
-    }, []);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -52,7 +32,7 @@ export default function UserSidebar() {
         goTo.refresh();
     }
 
-    const initials = userData?.fullName
+    const initials = user?.fullName
         ?.split(" ")
         .map((n: string) => n[0])
         .slice(0, 2)
@@ -114,31 +94,7 @@ export default function UserSidebar() {
             {/* Bottom */}
             <div className="mt-auto pt-3 border-t border-neutral-100 dark:border-white/6 flex flex-col gap-1">
                 {/* Profile */}
-                {loading ? (
-                    <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] border border-neutral-100 dark:border-white/[0.07] bg-neutral-50 dark:bg-white/[0.03] animate-pulse">
-                        {/* Avatar / Initials Skeleton */}
-                        <div className="w-8 h-8 rounded-[9px] bg-neutral-200 dark:bg-white/10 shrink-0" />
-
-                        <div className="min-w-0 flex-1 space-y-2">
-                            {/* Full Name Skeleton */}
-                            <div className="h-3 w-24 bg-neutral-200 dark:bg-white/10 rounded-full" />
-
-                            {/* Age Skeleton */}
-                            <div className="h-2 w-12 bg-neutral-100 dark:bg-white/5 rounded-full" />
-                        </div>
-                    </div>) : (
-                    <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] border border-neutral-100 dark:border-white/[0.07] bg-neutral-50 dark:bg-white/[0.03] cursor-pointer hover:bg-neutral-100 dark:hover:bg-white/[0.06] transition-colors">
-                        <span className="w-8 h-8 rounded-[9px] bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                            {initials}
-                        </span>
-                        <div className="min-w-0">
-                            <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">
-                                {userData?.fullName ?? "—"}
-                            </p>
-                            <p className="text-[10px] text-neutral-400">{userData?.age} Tahun</p>
-                        </div>
-                    </div>
-                )}
+                <MiniProfile />
 
                 {/* Logout */}
                 <button onClick={handleSignOut} className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12px] text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-red-500 transition-colors w-full">
