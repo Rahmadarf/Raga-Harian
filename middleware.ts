@@ -10,8 +10,8 @@ export async function middleware(request: NextRequest) {
     const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user?.id)
-        .single();
+        .eq('user_id', user?.id)
+        .maybeSingle();
 
     const url = request.nextUrl.clone();
     const role = profile?.role

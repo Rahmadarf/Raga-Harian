@@ -1,26 +1,41 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const targetId = searchParams.get("target_id");
 
     const supabase = await createClient();
 
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if (error || !user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        if (authError || !user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+
+        // 1. Ambil Role User yang sedang Login
+        const { data: currentUserProfile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        // 2. Tentukan ID yang akan ditarik datanya
+        // Logic: Jika ada targetId DAN yang request adalah dokter, izinkan. 
+        // Jika bukan dokter tapi mencoba akses targetId orang lain, paksa ke ID sendiri.
+        const isDoctor = currentUserProfile?.role === 'dokter';
+        const finalId = (isDoctor && targetId) ? targetId : user.id;
 
         const { data: health, error: dbError } = await supabase
             .from("health_metrics")
             .select("*")
-            .eq("user_id", user.id)
-            .maybeSingle()
+            .eq("user_id", finalId)
+            .maybeSingle();
 
-
-        if (dbError) {
-            return NextResponse.json({ error: "Profile not found", dbError }, { status: 404 })
+        // Jika data belum ada (misal pasien baru daftar)
+        if (!health) {
+            return NextResponse.json({ message: "No metrics data found" }, { status: 200 });
         }
 
         const idealBmi = (bmi: number) => {
@@ -34,12 +49,20 @@ export async function GET() {
             weight_kg: health.weight_kg,
             height_cm: health.height_cm,
             bmi: health.bmi,
-            added: idealBmi(health.bmi),
+            added: {
+                label: idealBmi(health.bmi).label,
+                bg: idealBmi(health.bmi).bg,
+                text: idealBmi(health.bmi).text,
+                border: idealBmi(health.bmi).border,
+                info: idealBmi(health.bmi).info
+            },
             target_weight: health.target_weight_kg,
-        })
+            blood_pressure: health.blood_pressure, // Tambahan untuk Dashboard Dokter
+            blood_sugar: health.blood_sugar       // Tambahan untuk Dashboard Dokter
+        });
 
     } catch (error) {
+        console.error("Health API Error:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
-
 }

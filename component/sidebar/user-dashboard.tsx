@@ -32,12 +32,6 @@ export default function UserSidebar() {
         goTo.refresh();
     }
 
-    const initials = user?.fullName
-        ?.split(" ")
-        .map((n: string) => n[0])
-        .slice(0, 2)
-        .join("") ?? "?";
-
     return (
         <aside className="fixed top-0 left-0 h-screen w-[220px] bg-secondary border-r border-neutral-100 dark:border-white/[0.06] flex flex-col px-3 py-5 z-50">
             {/* Logo */}

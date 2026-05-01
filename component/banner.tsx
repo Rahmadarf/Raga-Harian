@@ -1,12 +1,17 @@
+"use client"
+
 import BannerChip from "./banner-chip"
 import BannerSkeleton from "./ui/skeleton/banner-skeleton"
 import { useDashboard } from "@/context/DashboardProvider"
+
+import { usePathname } from "next/navigation"
 
 import { Chip } from '@/types/component'
 
 export default function Banner({ title, value, subtext, chips, percentage }: Chip) {
 
     const { loading } = useDashboard()
+    const url = usePathname()
 
     if (loading) {
         return <BannerSkeleton />
@@ -44,6 +49,18 @@ export default function Banner({ title, value, subtext, chips, percentage }: Chi
                         >
                             {percentage}%
                         </div>
+                    </div>
+                )}
+
+
+                {url === "/doctor-dashboard" && (
+                    <div className="flex gap-2.5 flex-wrap">
+                        <button className="px-4 py-2.5 rounded-xl text-[13px] font-medium flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
+                            💬 Buka Chat
+                        </button>
+                        <button className="px-4 py-2.5 rounded-xl text-[13px] font-medium flex items-center gap-1.5 bg-white text-[#00A8A8]">
+                            📋 Buat Resep
+                        </button>
                     </div>
                 )}
 

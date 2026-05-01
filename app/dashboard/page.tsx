@@ -74,7 +74,7 @@ const HealthDashboard: React.FC = () => {
                     value='Kondisi Ideal'
                     subtext='Berdasarkan 3 parameter: BMI, hidrasi & aktivitas'
                     chips={[
-                        { value: `${health?.bmi.toFixed(1)}`, label: 'BMI Skor' },
+                        { value: `${health?.bmi?.toFixed(1) || 0}`, label: 'BMI Skor' },
                         { value: `${waterToday / 1000} liter`, label: 'Hidrasi' },
                         { value: '7,240', label: 'Langkah' },
                     ]}
