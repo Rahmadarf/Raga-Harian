@@ -36,7 +36,7 @@ export default function HydrationCard() {
                     <div className="text-[11px] text-text-tertiary mt-1">dari target {dynamicTarget / 1000} Liter/hari</div>
                 </div>
                 <div className="text-[11px] font-medium text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-1 rounded-[20px]">
-                    {percentage.toFixed(1)}% tercapai
+                    {percentage?.toFixed(1)}% tercapai
                 </div>
             </div>
 
@@ -63,7 +63,7 @@ export default function HydrationCard() {
                 + Tambah 250 ml
             </button>
 
-            <div className={`mt-5 overflow-hidden rounded-2xl border ${waterStatus.border} ${waterStatus.bg} ${waterStatus.text}`}>
+            <div className={`mt-5 overflow-hidden rounded-2xl border ${waterStatus?.border} ${waterStatus?.bg} ${waterStatus?.text}`}>
                 <div className="flex">
                     {/* Aksen Garis Vertikal (Bikin UI kerasa lebih rapi) */}
                     <div className={`w-1.5 ${waterStatus.text.replace('text', 'bg')} opacity-40`} />

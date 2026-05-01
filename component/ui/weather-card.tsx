@@ -68,7 +68,7 @@ export default function WeatherCard() {
             </div>
 
             <div
-                className={`flex items-center gap-1.5 mt-2.5 rounded-[10px] px-2.5 py-2 text-[11px] border-[0.5] ${weather?.current.uvi.border} ${weather?.current.uvi.bg} ${weather?.current.uvi.color}`}
+                className={`flex items-center gap-1.5 mt-2.5 rounded-[10px] px-2.5 py-2 text-[11px] border-[0.5] ${weather?.current.uvi?.border} ${weather?.current.uvi?.bg} ${weather?.current.uvi?.color}`}
             >
                 <Info className={`w-3 h-3`} />
                 {weather?.current.uvi.added}

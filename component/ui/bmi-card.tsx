@@ -44,9 +44,9 @@ export default function BmiCard() {
             </div>
 
             <div
-                className={`inline-block text-[13px] font-medium rounded-[20px] px-2.5 py-0.5 mt-1 border-[0.5] ${health?.added.border} ${health?.added.bg} ${health?.added.text}`}
+                className={`inline-block text-[13px] font-medium rounded-[20px] px-2.5 py-0.5 mt-1 border-[0.5] ${health?.added?.border} ${health?.added?.bg} ${health?.added?.text}`}
             >
-                {health?.added.label}
+                {health?.added?.label}
             </div>
 
             <div className="mt-3.5">
@@ -102,10 +102,10 @@ export default function BmiCard() {
             </div>
 
             <div
-                className={`flex items-center gap-1.5 mt-2.5 rounded-[10px] px-2.5 py-2 text-[11px] border-[0.5] ${health?.added.border} ${health?.added.bg} ${health?.added.text}`}
+                className={`flex items-center gap-1.5 mt-2.5 rounded-[10px] px-2.5 py-2 text-[11px]  ${health?.added?.border} ${health?.added?.bg} ${health?.added?.text}`}
             >
                 <Info className={`w-3 h-3`} />
-                {health?.added.info}
+                {health?.added?.info}
             </div>
         </div>
     )

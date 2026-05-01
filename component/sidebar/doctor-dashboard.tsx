@@ -1,15 +1,16 @@
 // doctor-dashboard.tsx
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutGrid, MessageSquare, Users, Calendar, FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import MiniProfile from "../miniProfile";
 
+import { createClient } from "@/utils/supabase/client";
+
 const navItems = [
   { id: "dashboard", href: "/doctor-dashboard", icon: LayoutGrid, label: "Overview" },
-  { id: "chat", href: "/doctor-dashboard/chat", icon: MessageSquare, label: "Pesan Pasien", badge: "3", badgeType: "red" },
-  { id: "patients", href: "/doctor-dashboard/pasien", icon: Users, label: "Daftar Pasien", badge: "12", badgeType: "blue" },
-  { id: "schedule", href: "/doctor-dashboard/jadwal", icon: Calendar, label: "Jadwal Konsultasi" },
+  { id: "chat", href: "/doctor-dashboard/chat", icon: MessageSquare, label: "Pesan Pasien", badge: 12, badgeType: "red" },
+  { id: "patients", href: "/doctor-dashboard/pasien", icon: Users, label: "Daftar Pasien", badgeType: "blue" },
 ];
 
 const toolItems = [
@@ -19,6 +20,14 @@ const toolItems = [
 
 export default function DoctorSidebar() {
   const url = usePathname();
+  const supabase = createClient();
+  const goTo = useRouter();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    goTo.push("/");
+    goTo.refresh();
+  }
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-[220px] bg-secondary border-r border-neutral-100 dark:border-white/[0.06] flex flex-col px-3 py-5 z-50">
@@ -55,14 +64,14 @@ export default function DoctorSidebar() {
               key={item.id}
               href={item.href}
               className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12.5px] font-medium transition-all select-none ${isActive
-                  ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400"
-                  : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-neutral-800 dark:hover:text-neutral-200"
+                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400"
+                : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-neutral-800 dark:hover:text-neutral-200"
                 }`}
             >
               <span
                 className={`w-[30px] h-[30px] rounded-[8px] flex items-center justify-center flex-shrink-0 ${isActive
-                    ? "bg-white/70 dark:bg-blue-900/50"
-                    : "bg-neutral-100 dark:bg-white/[0.05]"
+                  ? "bg-white/70 dark:bg-blue-900/50"
+                  : "bg-neutral-100 dark:bg-white/[0.05]"
                   }`}
               >
                 <item.icon className="w-3.5 h-3.5" />
@@ -71,8 +80,8 @@ export default function DoctorSidebar() {
               {item.badge && (
                 <span
                   className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.badgeType === "blue"
-                      ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
-                      : "bg-red-500 text-white"
+                    ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
+                    : "bg-red-500 text-white"
                     }`}
                 >
                   {item.badge}
@@ -107,7 +116,7 @@ export default function DoctorSidebar() {
         <MiniProfile />
 
         {/* Logout */}
-        <button className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12px] text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-red-500 transition-colors w-full">
+        <button onClick={handleSignOut} className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[12px] text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:text-red-500 transition-colors w-full">
           <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
             <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l4-3-4-3M14 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

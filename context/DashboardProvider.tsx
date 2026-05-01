@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, createContext, useContext } from "react"
-import { DashboardContextType, UserType, HealthType, WeatherType } from "@/types/dashboard";
-
+import { createBrowserClient } from "@supabase/ssr";
 
 // 1. Definisi Interface
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -15,40 +14,55 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const [waterToday, setWaterToday] = useState<number>(0)
     const [dynamicTarget, setDynamicTarget] = useState<number>(2000)
     const [loading, setLoading] = useState<boolean>(true)
+    const [role, setRole] = useState<string>('')
+    const [patients, setPatients] = useState<any[]>([])
+
+
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
 
     //2. Fetching
     const fetchAllData = useCallback(async () => {
         try {
-            const [userRes, healthRes, weatherRes, waterRes] = await Promise.all([
-                fetch("/api/user"),
-                fetch("/api/metrics/health"),
-                fetch("/api/weather"),
-                fetch("/api/metrics/water"),
-            ]);
+            setLoading(true);
 
+            // 1. Ambil data User & Profile (Role) terlebih dahulu
+            const userRes = await fetch("/api/user");
             const userData = await userRes.json();
-            const healthData = await healthRes.json();
-            const weatherData = await weatherRes.json();
-            const waterData = await waterRes.json();
-
             setUser(userData);
-            setHealth(healthData);
-            setWeather(weatherData);
-            setWaterToday(waterData.total_ml || 0)
 
+            const userRole = userData?.profile?.role || 'dokter';
+            setRole(userRole);
 
-            // Dynamic Target
-            const currentTemp = weatherData?.current.temp || 0
-            const baseTarget = 2000;
-            if (currentTemp > 30) {
-                const extra = Math.floor((currentTemp - 30) / 2) * 250
-                setDynamicTarget(baseTarget + extra)
+            // 2. Conditional Fetching berdasarkan Role
+            if (userRole === 'dokter') {
+                // Jika DOKTER: Ambil API khusus dokter
+                const doctorRes = await fetch("/api/patient");
+                const patientsData = await doctorRes.json();
+                setPatients(patientsData);
             } else {
-                setDynamicTarget(baseTarget)
+                // Jika PASIEN: Ambil data kesehatan & hidrasi seperti biasa
+                const [healthRes, weatherRes, waterRes] = await Promise.all([
+                    fetch("/api/metrics/health"),
+                    fetch("/api/weather"),
+                    fetch("/api/metrics/water"),
+                ]);
+
+                const healthData = await healthRes.json();
+                const weatherData = await weatherRes.json();
+                const waterData = await waterRes.json();
+
+                setHealth(healthData);
+                setWeather(weatherData);
+                setWaterToday(waterData.total_ml || 0);
+
+                // Logic Dynamic Target
+                const currentTemp = weatherData?.current?.temp || 0;
+                setDynamicTarget(currentTemp > 30 ? 2000 + (Math.floor((currentTemp - 30) / 2) * 250) : 2000);
             }
-
-
-
 
         } catch (error) {
             console.error("Gagal mengambil data", error)
@@ -155,6 +169,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         <DashboardContext.Provider
             value={{
                 user,
+                patients,
+                role,
                 health,
                 weather,
                 waterToday,

@@ -49,15 +49,15 @@ export default function Home() {
       {/* ── HERO ── */}
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
         <motion.div {...fadeUp(0)}>
-          <span className="inline-flex items-center gap-2 bg-[rgba(0,168,168,0.1)] text-[#00A8A8] text-[12px] font-medium px-4 py-1.5 rounded-full mb-6">
+          <span className="inline-flex items-center gap-2 bg-[rgba(0,168,168,0.1)] text-primary text-[12px] font-medium px-4 py-1.5 rounded-full mb-6">
             <Zap size={12} /> Platform Kesehatan #1 di Indonesia
           </span>
         </motion.div>
         <motion.h1 {...fadeUp(0.1)} className="font-heading font-bold text-[52px] leading-[1.15] text-[#1E293B] mb-5 max-w-3xl mx-auto">
           Kendalikan Kesehatan Kamu{" "}
-          <span className="text-[#00A8A8]">Setiap Hari</span>
+          <span className="text-primary">Setiap Hari</span>
         </motion.h1>
-        <motion.p {...fadeUp(0.2)} className="text-[17px] text-[#64748B] max-w-xl mx-auto leading-relaxed mb-10">
+        <motion.p {...fadeUp(0.2)} className="text-[17px] text-text-secondary max-w-xl mx-auto leading-relaxed mb-10">
           Satu dashboard untuk monitoring kesehatan lengkap — cuaca, BMI, hidrasi, nutrisi, aktivitas, dan konsultasi dokter langsung dari genggaman tanganmu.
         </motion.p>
         <motion.div {...fadeUp(0.3)} className="flex items-center justify-center gap-4 flex-wrap">

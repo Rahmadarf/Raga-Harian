@@ -6,12 +6,19 @@ import PatientCard from "@/component/patient-card";
 import Tag from "@/component/tag";
 import { useState } from "react";
 
+import Banner from "@/component/banner";
+
+import { useDashboard } from "@/context/DashboardProvider";
+
 
 export default function DoctorDashboard() {
 
-
     const [activeView, setActiveView] = useState('dashboard');
     const [selectedPatient, setSelectedPatient] = useState('dimas');
+
+    const { user } = useDashboard()
+
+
 
     const patients = [
         { id: 'dimas', name: 'Dimas Kurniawan', initials: 'DK', age: 28, gender: 'Laki-laki', bmi: '22.4', td: '118/78', bg: '#00A8A8', email: 'dimas@mail.com', status: 'Sehat' },
@@ -25,44 +32,25 @@ export default function DoctorDashboard() {
     return (
         <div>
             {/* Topbar */}
-            <TopBar title="Selamat pagi, Dr. Reza 👋" subtitle="Senin, 14 April 2026 · 3 pasien menunggu balasan" />
+            <TopBar title={`Selamat pagi, Dr. ${user?.fullName}`} subtitle="3 pasien menunggu balasan" />
 
             {/* Banner */}
-            <div className="rounded-3xl p-5 px-6 text-white relative overflow-hidden mb-5" style={{ background: 'linear-gradient(135deg, #00A8A8 0%, #008E8E 100%)' }}>
-                <div className="absolute -top-[30px] -right-5 w-[130px] h-[130px] rounded-full bg-white/[0.07] pointer-events-none" />
-                <div className="absolute -bottom-[40px] right-20 w-[90px] h-[90px] rounded-full bg-white/[0.05] pointer-events-none" />
-                <div className="flex items-start justify-between flex-wrap gap-4">
-                    <div>
-                        <div className="text-[11px] font-medium uppercase tracking-wider mb-2 text-white/60" style={{ letterSpacing: '0.8px' }}>Ringkasan Hari Ini</div>
-                        <div className="text-[28px] font-bold text-white mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>8 Konsultasi Aktif</div>
-                        <div className="text-[13px] text-white/75">3 pesan belum dibalas · 2 jadwal sore ini</div>
-                    </div>
-                    <div className="flex gap-2.5 flex-wrap">
-                        <button onClick={() => setActiveView('chat')} className="px-4 py-2.5 rounded-xl text-[13px] font-medium flex items-center gap-1.5" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
-                            💬 Buka Chat
-                        </button>
-                        <button className="px-4 py-2.5 rounded-xl text-[13px] font-medium flex items-center gap-1.5 bg-white text-[#00A8A8]">
-                            📋 Buat Resep
-                        </button>
-                    </div>
-                </div>
-                <div className="flex gap-3.5 mt-4 flex-wrap">
-                    {[
-                        { val: '8', lbl: 'Pasien Aktif' },
-                        { val: '3', lbl: 'Pesan Baru' },
-                        { val: '5', lbl: 'Resep Dikirim' },
-                        { val: '4.9', lbl: 'Rating' },
-                    ].map((chip, i) => (
-                        <div key={i} className="rounded-[14px] px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                            <div className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{chip.val}</div>
-                            <div className="text-[11px] text-white/70">{chip.lbl}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <Banner
+                title="Ringkasan Hari Ini"
+                value="8 Konsultasi Aktif"
+                subtext="3 pesan belum dibalas · 2 jadwal sore ini"
+                chips={[
+                    { value: '8', label: 'Pasien Aktif' },
+                    { value: '3', label: 'Pesan Baru' },
+                    { value: '5', label: 'Resep Dikirim' },
+                    { value: '4.9', label: 'Rating' },
+                ]}
+            />
+
 
             {/* 3-col bento */}
-            <div className="grid gap-5 mb-5" style={{ gridTemplateColumns: '1.4fr 1fr 1fr' }}>
+            <div className="grid gap-5 mb-5 mt-5" style={{ gridTemplateColumns: '1.4fr 1fr 1fr' }}>
+
                 {/* Antrian pesan */}
                 <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
                     <div className="flex items-center justify-between mb-4">
@@ -78,28 +66,6 @@ export default function DoctorDashboard() {
                         ].map((item, i) => (
                             <div key={i} onClick={() => { setActiveView('chat'); setSelectedPatient(item.p.id); }}>
                                 <PatientCard p={item.p} active={item.active || false} onClick={() => { }} showUnread={!!item.unread} unreadCount={item.unread} lastMsg={item.msg} time={item.time} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Jadwal hari ini */}
-                <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
-                    <div className="text-[15px] font-bold text-[#1E293B] mb-3.5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Jadwal Hari Ini</div>
-                    <div className="flex flex-col gap-2.5">
-                        {[
-                            { time: '08:00', name: 'Dimas Kurniawan', type: 'Konsultasi Gizi · Online', status: '✓ Selesai', color: '#00A8A8', bg: 'rgba(0,168,168,0.07)' },
-                            { time: '10:30', name: 'Siti Rahayu', type: 'Review Lab · Online', status: '⏳ Menunggu', color: '#F97316', bg: 'rgba(249,115,22,0.07)' },
-                            { time: '14:00', name: 'Ahmad Fauzi', type: 'Kontrol Bulanan · Online', status: '📅 Terjadwal', color: '#3B82F6', bg: 'rgba(59,130,246,0.07)' },
-                            { time: '16:30', name: 'Linda Maulida', type: 'Follow-up Diet · Online', status: '🕑 Nanti', color: '#10B981', bg: 'rgba(16,185,129,0.07)' },
-                        ].map((j, i) => (
-                            <div key={i} className="flex gap-2.5 items-start">
-                                <div className="min-w-[40px] text-right text-[11px] font-semibold pt-0.5" style={{ color: j.color }}>{j.time}</div>
-                                <div className="flex-1 px-3 py-2.5 rounded-r-xl" style={{ background: j.bg, borderLeft: `3px solid ${j.color}` }}>
-                                    <div className="text-[13px] font-medium text-[#1E293B]">{j.name}</div>
-                                    <div className="text-[11px] text-[#64748B]">{j.type}</div>
-                                    <Tag text={j.status} type={j.status === '✓ Selesai' ? 'teal' : j.status === '⏳ Menunggu' ? 'orange' : j.status === '📅 Terjadwal' ? 'blue' : 'gray'} />
-                                </div>
                             </div>
                         ))}
                     </div>

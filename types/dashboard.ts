@@ -1,9 +1,11 @@
 
-export interface DashboardContextType {
+interface DashboardContextType {
     user: UserType | null,
     health: HealthType | null,
     weather: WeatherType | null,
     waterToday: number,
+    patients: any
+    role: any
     waterStatus: WaterStatusType,
     dynamicTarget: number,
     loading: boolean,
@@ -11,7 +13,7 @@ export interface DashboardContextType {
     addWater: (amount: number) => Promise<void>
 }
 
-export interface UserType {
+interface UserType {
     id: string,
     fullName: string,
     firstName: string,
@@ -19,7 +21,7 @@ export interface UserType {
     age: number,
 }
 
-export interface HealthType {
+interface HealthType {
     bmi: number,
     weight_kg: number,
     height_cm: number,
@@ -33,7 +35,7 @@ export interface HealthType {
     }
 }
 
-export interface WeatherType {
+interface WeatherType {
     city: string,
     current: {
         temp: number,
@@ -51,7 +53,7 @@ export interface WeatherType {
     }
 }
 
-export interface WaterStatusType {
+interface WaterStatusType {
     label: string;
     sub: string;
     bg: string;
