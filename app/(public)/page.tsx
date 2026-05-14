@@ -1,4 +1,7 @@
+
+
 "use client";
+
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -12,7 +15,7 @@ const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
-  transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.55, delay, easeOut: [0.22, 1, 0.36, 1] },
 });
 
 const fadeIn = (delay = 0) => ({
@@ -207,35 +210,39 @@ function SectionHeader({
   );
 }
 
-      {/* ── HERO ── */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
-        <motion.div {...fadeUp(0)}>
-          <span className="inline-flex items-center gap-2 bg-[rgba(0,168,168,0.1)] text-primary text-[12px] font-medium px-4 py-1.5 rounded-full mb-6">
-            <Zap size={12} /> Platform Kesehatan #1 di Indonesia
-          </span>
-        </motion.div>
-        <motion.h1 {...fadeUp(0.1)} className="font-heading font-bold text-[52px] leading-[1.15] text-[#1E293B] mb-5 max-w-3xl mx-auto">
-          Kendalikan Kesehatan Kamu{" "}
-          <span className="text-primary">Setiap Hari</span>
-        </motion.h1>
-        <motion.p {...fadeUp(0.2)} className="text-[17px] text-text-secondary max-w-xl mx-auto leading-relaxed mb-10">
-          Satu dashboard untuk monitoring kesehatan lengkap — cuaca, BMI, hidrasi, nutrisi, aktivitas, dan konsultasi dokter langsung dari genggaman tanganmu.
-        </motion.p>
-        <motion.div {...fadeUp(0.3)} className="flex items-center justify-center gap-4 flex-wrap">
-          <Link href="/auth/register" className="hp-btn-primary text-[15px] py-3 px-7 flex items-center gap-x-2">
-            Mulai Gratis Sekarang <ArrowRight size={16} />
-          </Link>
-          <Link href="/dashboard" className="hp-btn-outline text-[15px] py-3 px-7 flex items-center gap-x-2">
-            Lihat Demo <ChevronRight size={16} />
-          </Link>
-        </motion.div>
+// ── Hero Section ───────────────────────────────────────────────────────────────
 
-        {/* Hero visual */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="mt-16 relative"
+function HeroSection() {
+  return (
+    <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
+      {/* Badge */}
+      <motion.div {...fadeUp(0)}>
+        <SectionBadge icon={Zap}>Platform Kesehatan #1 di Indonesia</SectionBadge>
+      </motion.div>
+
+      {/* Headline */}
+      <motion.h1
+        {...fadeUp(0.1)}
+        className="font-heading font-bold text-[52px] leading-[1.15] text-[#1E293B] mb-5 max-w-3xl mx-auto"
+      >
+        Kendalikan Kesehatan Kamu{" "}
+        <span className="text-[#00A8A8]">Setiap Hari</span>
+      </motion.h1>
+
+      {/* Subheadline */}
+      <motion.p
+        {...fadeUp(0.2)}
+        className="text-[17px] text-[#64748B] max-w-xl mx-auto leading-relaxed mb-10"
+      >
+        Satu dashboard untuk monitoring kesehatan lengkap — cuaca, BMI, hidrasi, nutrisi,
+        aktivitas, dan konsultasi dokter langsung dari genggaman tanganmu.
+      </motion.p>
+
+      {/* CTAs */}
+      <motion.div {...fadeUp(0.3)} className="flex items-center justify-center gap-4 flex-wrap">
+        <Link
+          href="/auth/register"
+          className="hp-btn-primary text-[15px] py-3 px-7 inline-flex items-center gap-2"
         >
           Mulai Gratis Sekarang <ArrowRight size={16} />
         </Link>
@@ -474,11 +481,10 @@ function PricingSection() {
               key={p.name}
               {...fadeUp(i * 0.1)}
               whileHover={{ y: p.highlight ? 0 : -4 }}
-              className={`rounded-[24px] p-6 transition-all duration-200 ${
-                p.highlight
+              className={`rounded-[24px] p-6 transition-all duration-200 ${p.highlight
                   ? "bg-[#00A8A8] text-white shadow-[0_20px_60px_rgba(0,168,168,0.35)]"
                   : "bg-white"
-              }`}
+                }`}
             >
               {p.highlight && (
                 <div className="inline-flex items-center gap-1 bg-white/20 text-white text-[11px] font-semibold px-3 py-1 rounded-full mb-4 tracking-wide">
@@ -516,11 +522,10 @@ function PricingSection() {
 
               <Link
                 href="/auth/register"
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-[12px] font-semibold text-[13px] transition-all duration-200 ${
-                  p.highlight
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-[12px] font-semibold text-[13px] transition-all duration-200 ${p.highlight
                     ? "bg-white text-[#00A8A8] hover:bg-white/90"
                     : "bg-[#00A8A8] text-white hover:bg-[#008E8E]"
-                }`}
+                  }`}
               >
                 {p.cta} <ArrowRight size={14} />
               </Link>
@@ -577,7 +582,7 @@ function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="text-[12px] text-[#94A3B8]">© 2026 HealthPulse. Semua hak dilindungi.</p>
+        <p className="text-[12px] text-[#94A3B8]">©️ 2026 HealthPulse. Semua hak dilindungi.</p>
 
         {/* Links */}
         <nav className="flex gap-5 text-[12px] text-[#64748B]">

@@ -5,27 +5,31 @@ export async function GET() {
 
     const supabase = await createClient()
 
-
     try {
 
-        const { data: patient, error } = await supabase
+        const { data: patients, error } = await supabase
             .from('profiles')
             .select(`*`)
             .eq('role', 'pasien')
-            .maybeSingle()
 
-        if (error || !patient) {
-            return NextResponse.json({ error: 'Failed to fetch patients' }, { status: 500 })
+        if (error) {
+            return NextResponse.json({ error: 'Failed to fetch patients', details: error.message }, { status: 500 })
+        }
+
+        if (!patients || patients.length === 0) {
+            return NextResponse.json({ patients: [] })
         }
 
         return NextResponse.json({
-            id: patient?.id,
-            fullName: patient?.full_name,
-            firstName: patient?.first_name,
-            lastName: patient?.last_name,
-            email: patient?.email,
-            gender: patient?.gender,
-            age: patient?.age,
+            patients: patients.map(p => ({
+                id: p.id,
+                fullName: p.full_name,
+                firstName: p.first_name,
+                lastName: p.last_name,
+                email: p.email,
+                gender: p.gender,
+                age: p.age,
+            }))
         })
 
     } catch (error) {

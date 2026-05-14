@@ -16,6 +16,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState<boolean>(true)
     const [role, setRole] = useState<string>('')
     const [patients, setPatients] = useState<any[]>([])
+    const [refreshKey, setRefreshKey] = useState<number>(0)
 
 
     const supabase = createBrowserClient(
@@ -31,10 +32,46 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
             // 1. Ambil data User & Profile (Role) terlebih dahulu
             const userRes = await fetch("/api/user");
+
+            // Check if user is authenticated
+            if (!userRes.ok) {
+                console.error("User not authenticated");
+                setLoading(false);
+                return;
+            }
+
             const userData = await userRes.json();
+
+            // Check for error in response
+            if (userData.error) {
+                console.error("Error fetching user:", userData.error);
+                setLoading(false);
+                return;
+            }
+
             setUser(userData);
 
-            const userRole = userData?.profile?.role || 'dokter';
+            // Get role from profiles table via separate API call
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+
+            if (!authUser) {
+                console.error("No authenticated user");
+                setLoading(false);
+                return;
+            }
+
+            const { data: profiles, error: profileError } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', authUser.id);
+
+            if (profileError) {
+                console.error("Error fetching user profile:", profileError);
+                setLoading(false);
+                return;
+            }
+
+            const userRole = profiles?.[0]?.role || 'pasien';
             setRole(userRole);
 
             // 2. Conditional Fetching berdasarkan Role
@@ -42,7 +79,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
                 // Jika DOKTER: Ambil API khusus dokter
                 const doctorRes = await fetch("/api/patient");
                 const patientsData = await doctorRes.json();
-                setPatients(patientsData);
+                setPatients(patientsData.patients || []);
             } else {
                 // Jika PASIEN: Ambil data kesehatan & hidrasi seperti biasa
                 const [healthRes, weatherRes, waterRes] = await Promise.all([
@@ -55,13 +92,21 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
                 const weatherData = await weatherRes.json();
                 const waterData = await waterRes.json();
 
-                setHealth(healthData);
-                setWeather(weatherData);
-                setWaterToday(waterData.total_ml || 0);
+                // Only set data if no errors
+                if (!healthData.error) {
+                    setHealth(healthData);
+                }
 
-                // Logic Dynamic Target
-                const currentTemp = weatherData?.current?.temp || 0;
-                setDynamicTarget(currentTemp > 30 ? 2000 + (Math.floor((currentTemp - 30) / 2) * 250) : 2000);
+                if (!weatherData.error) {
+                    setWeather(weatherData);
+                    // Logic Dynamic Target
+                    const currentTemp = weatherData?.current?.temp || 0;
+                    setDynamicTarget(currentTemp > 30 ? 2000 + (Math.floor((currentTemp - 30) / 2) * 250) : 2000);
+                }
+
+                if (!waterData.error) {
+                    setWaterToday(waterData.total_ml || 0);
+                }
             }
 
         } catch (error) {
@@ -139,7 +184,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         };
     }, [weather, waterToday, dynamicTarget]);
 
-    // fungsi untuk menambah air
+    /**
+     * Fungsi untuk menambah air
+     * Mengupdate state waterToday secara optimistic (langsung tanpa menunggu response)
+     */
     const addWater = async (amount_ml: number) => {
         try {
             const res = await fetch("/api/metrics/water", {
@@ -151,12 +199,28 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (res.ok) {
-                await fetchAllData();
+                // Update waterToday secara optimistic tanpa fetch ulang semua data
+                setWaterToday(prev => prev + amount_ml);
+
+                // Optional: Fetch hanya data water untuk sinkronisasi
+                const waterRes = await fetch("/api/metrics/water");
+                const waterData = await waterRes.json();
+                if (!waterData.error) {
+                    setWaterToday(waterData.total_ml || 0);
+                }
             }
 
         } catch (error) {
             console.error("Gagal menambah air", error)
         }
+    }
+
+    /**
+     * Fungsi untuk trigger refresh semua komponen yang menggunakan refreshKey
+     * Dipanggil setelah ada perubahan data (meal, exercise, note, goal)
+     */
+    const triggerRefresh = () => {
+        setRefreshKey(prev => prev + 1);
     }
 
     //3. Use Effect, fetch data saat komponen pertama kali di-render
@@ -178,7 +242,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
                 dynamicTarget,
                 addWater,
                 loading,
-                refreshAll: fetchAllData
+                refreshKey,
+                refreshAll: fetchAllData,
+                triggerRefresh
             }}
         >
             {children}

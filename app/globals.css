@@ -64,4 +64,22 @@ body {
   .skeleton {
     @apply bg-skeleton-base dark:bg-skeleton-dark-base bg-linear-to-r from-transparent via-skeleton-shimmer dark:via-skeleton-dark-shimmer to-transparent bg-size-[200%_100%] animate-shimmer;
   }
+
+  /* Button Components */
+  .hp-btn-primary {
+    @apply bg-[#00A8A8] text-white rounded-[12px] font-semibold;
+    @apply hover:bg-[#008E8E] active:scale-[0.98] transition-all duration-200;
+    @apply shadow-[0_4px_12px_rgba(0,168,168,0.25)];
+  }
+
+  .hp-btn-outline {
+    @apply bg-white text-[#00A8A8] rounded-[12px] font-semibold border border-[#00A8A8]/20;
+    @apply hover:bg-[#00A8A8]/5 hover:border-[#00A8A8]/40 active:scale-[0.98] transition-all duration-200;
+  }
+
+  /* Card Component */
+  .hp-card {
+    @apply bg-white rounded-[20px] p-5 border border-[#EEF2F7];
+    @apply shadow-[0_2px_12px_rgba(0,0,0,0.04)];
+  }
 }

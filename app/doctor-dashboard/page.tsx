@@ -1,173 +1,295 @@
 "use client"
 
-import { Bell } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Bell, Users, MessageSquare, TrendingUp, Calendar, Clock, Award, FileText } from "lucide-react";
 import TopBar from "@/component/top-banner";
-import PatientCard from "@/component/patient-card";
-import Tag from "@/component/tag";
-import { useState } from "react";
-
 import Banner from "@/component/banner";
-
+import DoctorPatientsList from "@/component/ui/doctor-patients-list";
+import DoctorChatPanel from "@/component/ui/doctor-chat-panel";
 import { useDashboard } from "@/context/DashboardProvider";
 
+interface Patient {
+    id: string;
+    name: string;
+    initials: string;
+    email: string;
+    gender: string;
+    age: number;
+    bmi: number | null;
+    weight: number | null;
+    height: number | null;
+    waterToday: number;
+    caloriesToday: number;
+    exerciseMinutesToday: number;
+    unreadMessages: number;
+    status: string;
+    lastActivity: string | null;
+}
+
+interface DoctorStats {
+    totalPatients: number;
+    activePatients: number;
+    unreadMessages: number;
+    prescriptions: number;
+    rating: number;
+}
 
 export default function DoctorDashboard() {
-
-    const [activeView, setActiveView] = useState('dashboard');
-    const [selectedPatient, setSelectedPatient] = useState('dimas');
-
     const { user } = useDashboard()
 
+    const [activeView, setActiveView] = useState<'dashboard' | 'chat'>('dashboard');
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [loading, setLoading] = useState(true);
 
+    // Doctor stats (mock for now, can be fetched from API)
+    const [stats, setStats] = useState<DoctorStats>({
+        totalPatients: 0,
+        activePatients: 0,
+        unreadMessages: 0,
+        prescriptions: 23,
+        rating: 4.9
+    });
 
-    const patients = [
-        { id: 'dimas', name: 'Dimas Kurniawan', initials: 'DK', age: 28, gender: 'Laki-laki', bmi: '22.4', td: '118/78', bg: '#00A8A8', email: 'dimas@mail.com', status: 'Sehat' },
-        { id: 'siti', name: 'Siti Rahayu', initials: 'SR', age: 38, gender: 'Perempuan', bmi: '27.1', td: '124/82', bg: '#3B82F6', email: 'siti@mail.com', status: 'Perhatian' },
-        { id: 'ahmad', name: 'Ahmad Fauzi', initials: 'AF', age: 52, gender: 'Laki-laki', bmi: '25.8', td: '138/88', bg: '#F97316', email: 'ahmad@mail.com', status: 'Dipantau' },
-        { id: 'linda', name: 'Linda Maulida', initials: 'LM', age: 34, gender: 'Perempuan', bmi: '21.2', td: '115/75', bg: '#8B5CF6', email: 'linda@mail.com', status: 'Sehat' },
-        { id: 'budi', name: 'Budi Santoso', initials: 'BS', age: 45, gender: 'Laki-laki', bmi: '29.4', td: '142/92', bg: '#EF4444', email: 'budi@mail.com', status: 'Segera' },
-        { id: 'rina', name: 'Rina Anggraini', initials: 'RA', age: 29, gender: 'Perempuan', bmi: '20.8', td: '112/72', bg: '#10B981', email: 'rina@mail.com', status: 'Sehat' },
-    ];
+    /**
+     * Fetch patients from API
+     */
+    const fetchPatients = useCallback(async () => {
+        try {
+            const res = await fetch("/api/doctor/patients");
+            const data = await res.json();
+
+            console.log("DEBUG - API response:", data);
+
+            if (data.patients) {
+                setPatients(data.patients);
+
+                // Calculate stats
+                const unread = data.patients.reduce((sum: number, p: Patient) => sum + (p.unreadMessages || 0), 0);
+                setStats(prev => ({
+                    ...prev,
+                    totalPatients: data.patients.length,
+                    activePatients: data.patients.filter((p: Patient) => p.status !== "Segera").length,
+                    unreadMessages: unread
+                }));
+            } else if (data.error) {
+                console.error("API Error:", data.error);
+            }
+        } catch (error) {
+            console.error("Failed to fetch patients:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchPatients();
+    }, [fetchPatients]);
+
+    /**
+     * Handle patient selection
+     */
+    const handleSelectPatient = (patient: Patient) => {
+        setSelectedPatient(patient);
+        setActiveView('chat');
+
+        // Mark as read if has unread
+        if (patient.unreadMessages > 0) {
+            fetchPatients(); // Refresh to update unread count
+        }
+    };
+
+    /**
+     * Handle closing chat panel
+     */
+    const handleCloseChat = () => {
+        setActiveView('dashboard');
+        setSelectedPatient(null);
+    };
+
+    // Get patients yang butuh perhatian
+    const patientsNeedingAttention = patients.filter(p =>
+        p.status === "Perhatian" || p.status === "Segera"
+    );
 
     return (
-        <div>
+        <div className="space-y-6">
             {/* Topbar */}
-            <TopBar title={`Selamat pagi, Dr. ${user?.fullName}`} subtitle="3 pasien menunggu balasan" />
+            <TopBar
+                title={`Selamat pagi, ${user?.fullName ? `Dr. ${user.fullName}` : "Dokter"}`}
+                subtitle={`${stats.unreadMessages > 0 ? `${stats.unreadMessages} pesan belum dibalas` : "Semua pesan sudah dibaca"}`}
+            />
 
             {/* Banner */}
             <Banner
                 title="Ringkasan Hari Ini"
-                value="8 Konsultasi Aktif"
-                subtext="3 pesan belum dibalas · 2 jadwal sore ini"
+                value={`${stats.activePatients} Konsultasi Aktif`}
+                subtext={stats.unreadMessages > 0 ? `${stats.unreadMessages} pesan belum dibalas` : "Semua pesan sudah dibaca"}
                 chips={[
-                    { value: '8', label: 'Pasien Aktif' },
-                    { value: '3', label: 'Pesan Baru' },
-                    { value: '5', label: 'Resep Dikirim' },
-                    { value: '4.9', label: 'Rating' },
+                    { value: `${stats.totalPatients}`, label: 'Total Pasien' },
+                    { value: `${stats.unreadMessages}`, label: 'Pesan Baru' },
+                    { value: `${stats.prescriptions}`, label: 'Resep' },
+                    { value: `${stats.rating}`, label: 'Rating' },
                 ]}
             />
 
+            {/* Main Content - 2 Column Layout */}
+            <div className="grid gap-5" style={{ gridTemplateColumns: activeView === 'chat' ? '350px 1fr' : '1fr 1fr 1fr' }}>
+                {/* Patients List */}
+                <div className={activeView === 'chat' ? '' : 'col-span-1'}>
+                    <DoctorPatientsList
+                        onSelectPatient={handleSelectPatient}
+                        selectedPatientId={selectedPatient?.id}
+                    />
+                </div>
 
-            {/* 3-col bento */}
-            <div className="grid gap-5 mb-5 mt-5" style={{ gridTemplateColumns: '1.4fr 1fr 1fr' }}>
+                {/* Chat Panel - shown when in chat view */}
+                {activeView === 'chat' && (
+                    <div className="col-span-2" style={{ minHeight: '500px' }}>
+                        <DoctorChatPanel
+                            patient={selectedPatient}
+                            onClose={handleCloseChat}
+                        />
+                    </div>
+                )}
 
-                {/* Antrian pesan */}
+                {/* Stats Cards - hidden when in chat view */}
+                {activeView === 'dashboard' && (
+                    <>
+                        {/* Stats Column 1 */}
+                        <div className="flex flex-col gap-4">
+                            {/* Total Patients */}
+                            <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#00A8A8]/10 flex items-center justify-center">
+                                        <Users className="w-5 h-5 text-[#00A8A8]" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#94A3B8]">Total Pasien</div>
+                                        <div className="text-2xl font-bold text-[#1E293B]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                            {loading ? '-' : stats.totalPatients}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-[#64748B]">
+                                    {stats.activePatients} aktif · {stats.totalPatients - stats.activePatients} perlu follow-up
+                                </div>
+                            </div>
+
+                            {/* Prescriptions */}
+                            <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center">
+                                        <FileText className="w-5 h-5 text-[#3B82F6]" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#94A3B8]">Resep Diterbitkan</div>
+                                        <div className="text-2xl font-bold text-[#3B82F6]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                            {stats.prescriptions}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-[#64748B]">
+                                    Bulan ini
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Stats Column 2 */}
+                        <div className="flex flex-col gap-4">
+                            {/* Unread Messages */}
+                            <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#F97316]/10 flex items-center justify-center">
+                                        <MessageSquare className="w-5 h-5 text-[#F97316]" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#94A3B8]">Pesan Baru</div>
+                                        <div className="text-2xl font-bold text-[#F97316]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                            {loading ? '-' : stats.unreadMessages}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-[#64748B]">
+                                    Belum dibaca
+                                </div>
+                            </div>
+
+                            {/* Rating */}
+                            <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#F59E0B]/10 flex items-center justify-center">
+                                        <Award className="w-5 h-5 text-[#F59E0B]" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#94A3B8]">Rating</div>
+                                        <div className="text-2xl font-bold text-[#F59E0B]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                            {stats.rating}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-0.5">
+                                    <span className="text-[#F59E0B] text-sm">★★★★★</span>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {/* Patients Needing Attention - only in dashboard view */}
+            {activeView === 'dashboard' && patientsNeedingAttention.length > 0 && (
                 <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-[15px] font-bold text-[#1E293B]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Antrian Pesan</div>
-                        <button onClick={() => setActiveView('chat')} className="bg-[#00A8A8] text-white rounded-lg px-3 py-1.5 text-xs font-medium">Lihat Semua</button>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-[#EF4444]/10 flex items-center justify-center">
+                                <TrendingUp className="w-5 h-5 text-[#EF4444]" />
+                            </div>
+                            <div>
+                                <div className="text-sm font-semibold text-[#1E293B]">Pasien Perlu Perhatian</div>
+                                <div className="text-xs text-[#94A3B8]">
+                                    {patientsNeedingAttention.length} pasien membutuhkan follow-up
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-2">
-                        {[
-                            { p: patients[0], msg: 'Pusing dari pagi, kira-kira...', time: '08:20', unread: 2, active: true },
-                            { p: patients[1], msg: 'Dok, hasil lab sudah keluar...', time: '07:55', unread: 1 },
-                            { p: patients[2], msg: 'Sudah minum obat, tapi masih...', time: 'Kemarin', unread: 1 },
-                            { p: patients[3], msg: 'Terima kasih dok 🙏', time: 'Kemarin' },
-                        ].map((item, i) => (
-                            <div key={i} onClick={() => { setActiveView('chat'); setSelectedPatient(item.p.id); }}>
-                                <PatientCard p={item.p} active={item.active || false} onClick={() => { }} showUnread={!!item.unread} unreadCount={item.unread} lastMsg={item.msg} time={item.time} />
+
+                    <div className="space-y-2">
+                        {patientsNeedingAttention.slice(0, 5).map((patient) => (
+                            <div
+                                key={patient.id}
+                                onClick={() => handleSelectPatient(patient)}
+                                className="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F8FAFC] cursor-pointer transition-colors border border-transparent hover:border-[#EEF2F7]"
+                            >
+                                <div
+                                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs"
+                                    style={{ background: patient.status === "Segera" ? "#EF4444" : "#F59E0B" }}
+                                >
+                                    {patient.initials}
+                                </div>
+                                <div className="flex-1">
+                                    <div className="text-sm font-medium text-[#1E293B]">{patient.name}</div>
+                                    <div className="text-xs text-[#64748B]">
+                                        {patient.age} tahun · BMI {patient.bmi || '-'}
+                                    </div>
+                                </div>
+                                <span
+                                    className="text-xs px-3 py-1 rounded-full font-medium"
+                                    style={{
+                                        background: patient.status === "Segera" ? "#FEF2F2" : "#FEF9C3",
+                                        color: patient.status === "Segera" ? "#EF4444" : "#CA8A04"
+                                    }}
+                                >
+                                    {patient.status}
+                                </span>
+                                <button className="px-4 py-2 rounded-xl bg-[#00A8A8] text-white text-xs font-medium hover:bg-[#008E8E] transition-colors">
+                                    Chat
+                                </button>
                             </div>
                         ))}
                     </div>
                 </div>
-
-                {/* Statistik */}
-                <div className="flex flex-col gap-3.5">
-                    <div className="bg-white rounded-[18px] p-4 border border-[#EEF2F7]">
-                        <div className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2">Pasien Ditangani Bulan Ini</div>
-                        <div className="text-[32px] font-bold text-[#1E293B]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            48 <span className="text-sm font-normal text-[#64748B]">pasien</span>
-                        </div>
-                        <Tag text="▲ +12% vs bulan lalu" type="green" />
-                    </div>
-                    <div className="bg-white rounded-[18px] p-4 border border-[#EEF2F7]">
-                        <div className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2">Resep Diterbitkan</div>
-                        <div className="text-[32px] font-bold text-[#3B82F6]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>23</div>
-                        <div className="text-xs text-[#64748B] mt-1">Bulan April 2026</div>
-                    </div>
-                    <div className="bg-white rounded-[18px] p-4 border border-[#EEF2F7]">
-                        <div className="text-[11px] font-medium text-[#94A3B8] uppercase tracking-wider mb-2">Rating Kepuasan</div>
-                        <div className="text-[32px] font-bold text-[#F97316]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                            4.9 <span className="text-sm font-normal text-[#64748B]">/ 5.0</span>
-                        </div>
-                        <div className="flex gap-0.5 mt-1.5">
-                            <span className="text-[#F97316] text-sm">★★★★★</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Pasien perlu perhatian + Aktivitas */}
-            <div className="grid grid-cols-2 gap-5">
-                <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
-                    <div className="text-[15px] font-bold text-[#1E293B] mb-3.5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Pasien Perlu Perhatian</div>
-                    <table className="w-full border-collapse text-[13px]">
-                        <thead>
-                            <tr>
-                                <th className="text-left px-3.5 py-2.5 text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide border-b border-[#F1F5F9] bg-[#FAFBFC]">Pasien</th>
-                                <th className="text-left px-3.5 py-2.5 text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide border-b border-[#F1F5F9] bg-[#FAFBFC]">Indikator</th>
-                                <th className="text-left px-3.5 py-2.5 text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide border-b border-[#F1F5F9] bg-[#FAFBFC]">Status</th>
-                                <th className="text-left px-3.5 py-2.5 text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide border-b border-[#F1F5F9] bg-[#FAFBFC]">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[
-                                { p: patients[1], ind: 'Kolesterol Tinggi', status: 'Perlu Tindak', tag: 'red' },
-                                { p: patients[2], ind: 'TD Sedikit Tinggi', status: 'Dipantau', tag: 'orange' },
-                                { p: patients[4], ind: 'Gula Darah Tinggi', status: 'Segera', tag: 'red' },
-                            ].map((row, i) => (
-                                <tr key={i} className="hover:bg-[#FAFBFF] cursor-pointer" onClick={() => { setActiveView('chat'); setSelectedPatient(row.p.id); }}>
-                                    <td className="px-3.5 py-3 border-b border-[#F8FAFC]">
-                                        <div className="font-medium">{row.p.name}</div>
-                                        <div className="text-[11px] text-[#64748B]">{row.p.age} th · {row.p.gender === 'Laki-laki' ? 'L' : 'P'}</div>
-                                    </td>
-                                    <td className="px-3.5 py-3 border-b border-[#F8FAFC]"><Tag text={row.ind} type={row.tag as any} /></td>
-                                    <td className="px-3.5 py-3 border-b border-[#F8FAFC]"><Tag text={row.status} type={row.tag as any} /></td>
-                                    <td className="px-3.5 py-3 border-b border-[#F8FAFC]">
-                                        <button onClick={(e) => { e.stopPropagation(); setActiveView('chat'); setSelectedPatient(row.p.id); }} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${row.p.id === 'budi' ? 'bg-[#FEF2F2] text-[#EF4444]' : 'bg-[#F1F5F9] text-[#64748B]'}`}>{row.p.id === 'budi' ? 'Urgent' : 'Chat'}</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="bg-white rounded-3xl p-5 border border-[#EEF2F7]">
-                    <div className="text-[15px] font-bold text-[#1E293B] mb-3.5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Aktivitas Konsultasi (7 Hari)</div>
-                    <div className="flex items-end gap-[10px] h-[100px] px-1 mb-2">
-                        {[
-                            { val: '5', h: 50, c: '#BFDBFE', day: 'Sen' },
-                            { val: '9', h: 90, c: '#BFDBFE', day: 'Sel' },
-                            { val: '7', h: 70, c: '#BFDBFE', day: 'Rab' },
-                            { val: '11', h: 100, c: '#93C5FD', day: 'Kam' },
-                            { val: '8', h: 80, c: '#00A8A8', day: 'Jum', active: true },
-                            { val: '3', h: 30, c: '#F1F5F9', day: 'Sab', dim: true },
-                            { val: '1', h: 10, c: '#F1F5F9', day: 'Min', dim: true },
-                        ].map((b, i) => (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-[5px]">
-                                <div className={`text-[10px] ${b.active ? 'text-[#00A8A8] font-semibold' : b.dim ? 'text-[#94A3B8]' : 'text-[#94A3B8]'}`}>{b.val}</div>
-                                <div className="w-full rounded-[5px] transition-opacity" style={{ height: `${b.h}px`, background: b.c }} />
-                                <div className={`text-[10px] ${b.active ? 'text-[#00A8A8] font-semibold' : b.dim ? 'text-[#CBD5E1]' : 'text-[#94A3B8]'}`}>{b.day}</div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="h-px bg-[#F1F5F9] my-3.5" />
-                    <div className="flex gap-5">
-                        <div>
-                            <div className="text-[11px] text-[#94A3B8]">Total minggu ini</div>
-                            <div className="font-bold text-[#1E293B] text-lg" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>44</div>
-                        </div>
-                        <div>
-                            <div className="text-[11px] text-[#94A3B8]">Rata-rata/hari</div>
-                            <div className="font-bold text-[#00A8A8] text-lg" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>6.3</div>
-                        </div>
-                        <div>
-                            <div className="text-[11px] text-[#94A3B8]">Kepuasan</div>
-                            <div className="font-bold text-[#F97316] text-lg" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>98%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            )}
         </div>
     )
 }

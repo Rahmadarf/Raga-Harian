@@ -9,7 +9,9 @@ interface DashboardContextType {
     waterStatus: WaterStatusType,
     dynamicTarget: number,
     loading: boolean,
-    refreshAll: () => Promise<void>,
+    refreshKey: number,              // State untuk trigger re-render komponen
+    refreshAll: () => Promise<void>, // Refresh semua data
+    triggerRefresh: () => void,      // Trigger refresh tanpa fetch ulang semua data
     addWater: (amount: number) => Promise<void>
 }
 

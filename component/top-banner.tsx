@@ -1,12 +1,13 @@
 "use client"
 
-import { usePathname } from "next/navigation";
-import { Plus, Bell } from 'lucide-react'
-import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { LogOut, Settings, User, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { useDashboard } from "@/context/DashboardProvider";
-
+import NotificationBell from "@/component/ui/notification-bell";
 
 interface TopBarProps {
     title: string;
@@ -15,7 +16,10 @@ interface TopBarProps {
 
 const TopBar = ({ title, subtitle }: TopBarProps) => {
     const url = usePathname();
+    const router = useRouter();
     const { loading, user } = useDashboard()
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const initials = user?.fullName
         ?.split(" ")
@@ -30,23 +34,34 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
         year: 'numeric',
     });
 
+    const handleSignOut = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push("/");
+        router.refresh();
+    };
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     if (loading) {
         return (
             <div className="flex items-center justify-between mb-7 animate-pulse">
-                {/* Sisi Kiri: Title & Subtitle */}
                 <div>
-                    {/* Title Skeleton */}
                     <div className="h-7 w-48 bg-neutral-200 rounded-lg mb-2" />
-                    {/* Subtitle Skeleton */}
                     <div className="h-4 w-36 bg-neutral-100 rounded-md" />
                 </div>
-
-                {/* Sisi Kanan: Action Items */}
                 <div className="flex items-center gap-3">
-                    {/* Button/Notification Icon Skeleton */}
                     <div className="w-[38px] h-[38px] rounded-[10px] bg-neutral-100 border border-neutral-50" />
-
-                    {/* Profile Avatar Skeleton */}
                     <div className="w-[38px] h-[38px] rounded-full bg-neutral-200" />
                 </div>
             </div>
@@ -65,48 +80,72 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
                 <div className="text-[13px] text-text-secondary mt-0.5">{today} · {subtitle}</div>
             </div>
             <div className="flex items-center gap-3">
-                {url === '/dashboard/nutrisi' && (
+                <NotificationBell />
+
+                {/* Profile Menu */}
+                <div className="relative" ref={menuRef}>
                     <button
-                        className="inline-flex items-center gap-1.5 text-white cursor-pointer border-[1.5px] border-primary rounded-xl px-4 py-2.5 text-[13px] font-medium bg-primary"
-                        style={{ fontFamily: "'Rubik', sans-serif" }}
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
                     >
-                        <Plus className="w-4 h-4" />
-                        Tambah Makanan
-                    </button>
-                )}
-                {url === '/dashboard/konsultasi' && (
-                    <button
-                        className="inline-flex items-center gap-1.5 text-white cursor-pointer border-[1.5px] border-primary rounded-xl px-4 py-2.5 text-[13px] font-medium bg-primary"
-                        style={{ fontFamily: "'Rubik', sans-serif" }}
-                    >
-                        <Plus className="w-4 h-4" />
-                        Konsultasi Baru
-                    </button>
-                )}
-                {url !== '/dashboard/nutrisi' && (
-                    <div className="w-[38px] h-[38px] rounded-[10px] bg-white border border-gray-200 flex items-center justify-center relative cursor-pointer">
-                        <Bell className="w-4 h-4 text-text-secondary" />
                         <div
-                            className="absolute top-2 right-2 w-[7px] h-[7px] rounded-full border-[1.5px] border-white bg-alert"
-                        />
-                    </div>
-                )}
-                {loading ? (
-                    <div
-                        className="w-[38px] h-[38px] rounded-full border border-neutral-100 dark:border-white/[0.07] skeleton"
-                    />
-                ) : (
-                    <div
-                        className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white text-sm font-bold bg-primary"
-                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                    >
-                        {initials}
-                    </div>
-                )}
+                            className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white text-sm font-bold bg-primary"
+                            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                        >
+                            {initials}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    <AnimatePresence>
+                        {showMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#EEF2F7] overflow-hidden z-50"
+                            >
+                                {/* User Info */}
+                                <div className="px-4 py-3 border-b border-[#F1F5F9]">
+                                    <div className="font-medium text-sm text-[#1E293B]">
+                                        {user?.fullName || "User"}
+                                    </div>
+                                    <div className="text-xs text-[#94A3B8] truncate">
+                                        {(user as any)?.email || user?.fullName || "User"}
+                                    </div>
+                                </div>
+
+                                {/* Menu Items */}
+                                <div className="py-2">
+                                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] transition-colors">
+                                        <User className="w-4 h-4" />
+                                        Profil Saya
+                                    </button>
+                                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] transition-colors">
+                                        <Settings className="w-4 h-4" />
+                                        Pengaturan
+                                    </button>
+                                </div>
+
+                                {/* Logout */}
+                                <div className="border-t border-[#F1F5F9] py-2">
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Keluar / Logout
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     );
 }
-
 
 export default TopBar;

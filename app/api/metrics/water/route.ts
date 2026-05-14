@@ -11,12 +11,16 @@ export async function GET() {
 
     if (!user) return NextResponse.json({ total_ml: 0 })
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0];
 
     const { data } = await supabase
         .from("water_intake")
         .select("amount_ml")
-        .gte('created_at', today)
+        .eq('user_id', user.id)
+        .gte('created_at', `${todayStr}T00:00:00`)
+        .lt('created_at', `${tomorrowStr}T00:00:00`);
 
     const total_ml = data?.reduce((sum, current) => sum + current.amount_ml, 0) ?? 0;
 
