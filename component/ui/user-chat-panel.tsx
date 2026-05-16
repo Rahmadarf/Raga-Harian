@@ -176,10 +176,8 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
         return () => {
             clearTimeout(timer);
             console.log("💬 UserChatPanel: Cleaning up channel");
-            if (channel) {
-                supabase.removeChannel(channel);
-            }
             if (channelRef.current) {
+                channelRef.current.unsubscribe();
                 channelRef.current = null;
             }
         };
@@ -196,12 +194,13 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
             const res = await fetch(`/api/messages?doctor_id=${doctor.id}`);
             const data = await res.json();
 
-            if (data.messages) {
+            if (data.messages && Array.isArray(data.messages)) {
                 // Track all fetched message IDs to avoid duplicates
-                const fetchedIds = new Set(data.messages.map((m: Message) => m.id));
-                fetchedIds.forEach(id => processedIdsRef.current.add(id));
+                data.messages.forEach((m: Message) => {
+                    processedIdsRef.current.add(m.id);
+                });
 
-                setMessages(data.messages);
+                setMessages(data.messages as Message[]);
             }
         } catch (error) {
             console.error("Failed to fetch messages:", error);
@@ -464,16 +463,14 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
                             {/* Message bubble */}
                             <div className={`flex ${msg.isMine ? "justify-end" : "justify-start"} mb-2`}>
                                 <div
-                                    className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
-                                        msg.isMine
+                                    className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${msg.isMine
                                             ? "bg-[#00A8A8] text-white rounded-br-md"
                                             : "bg-[#F1F5F9] text-[#1E293B] rounded-bl-md"
-                                    }`}
+                                        }`}
                                 >
                                     <p className="leading-relaxed whitespace-pre-wrap">{msg.message}</p>
-                                    <div className={`flex items-center justify-end gap-1 mt-1 ${
-                                        msg.isMine ? "text-white/70" : "text-[#94A3B8]"
-                                    }`}>
+                                    <div className={`flex items-center justify-end gap-1 mt-1 ${msg.isMine ? "text-white/70" : "text-[#94A3B8]"
+                                        }`}>
                                         <span className="text-[10px]">{formatTime(msg.createdAt)}</span>
                                         {msg.isMine && (
                                             msg.isRead ? (

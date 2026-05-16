@@ -164,10 +164,8 @@ export default function DoctorChatPanel({ patient, onClose }: DoctorChatPanelPro
         return () => {
             clearTimeout(timer);
             console.log("🏥 DoctorChatPanel: Cleaning up channel");
-            if (channel) {
-                supabase.removeChannel(channel);
-            }
             if (channelRef.current) {
+                channelRef.current.unsubscribe();
                 channelRef.current = null;
             }
         };
@@ -184,12 +182,15 @@ export default function DoctorChatPanel({ patient, onClose }: DoctorChatPanelPro
             const res = await fetch(`/api/doctor/messages?patient_id=${patient.id}`);
             const data = await res.json();
 
-            if (data.messages) {
+            if (data.messages && Array.isArray(data.messages)) {
                 // Track fetched IDs
-                const fetchedIds = new Set(data.messages.map((m: Message) => m.id));
-                fetchedIds.forEach(id => processedIdsRef.current.add(id));
+                const fetchedIds = new Set<string>();
+                data.messages.forEach((m: Message) => {
+                    fetchedIds.add(m.id);
+                    processedIdsRef.current.add(m.id);
+                });
 
-                setMessages(data.messages);
+                setMessages(data.messages as Message[]);
             }
         } catch (error) {
             console.error("Failed to fetch messages:", error);
