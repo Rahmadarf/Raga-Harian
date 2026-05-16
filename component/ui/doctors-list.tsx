@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     Search,
     Star,
@@ -34,7 +34,7 @@ export default function DoctorsList({ onSelectDoctor, selectedDoctorId }: Doctor
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
     /**
-     * Fetch doctors dari API
+     * Fetch doctors dari API (hanya sekali saat mount)
      */
     const fetchDoctors = useCallback(async () => {
         try {

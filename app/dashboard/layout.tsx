@@ -26,7 +26,7 @@ export default function RootLayout({
             lang="en"
             className={`${jakarta.variable} ${rubik.variable} h-full antialiased`}
         >
-            <body className="min-h-full flex-1 flex-col w-full overflow-y-auto bg-[#F8FAFC] p-0">
+            <body className="min-h-full flex-1 flex-col w-full overflow-y-auto bg-background p-0">
                 <DashboardProvider>
                     {children}
                 </DashboardProvider>

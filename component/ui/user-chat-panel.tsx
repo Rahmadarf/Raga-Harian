@@ -50,6 +50,140 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
     const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const channelRef = useRef<any>(null);
+    const processedIdsRef = useRef<Set<string>>(new Set());
+
+    /**
+     * Setup Supabase Realtime untuk pesan baru
+     */
+    useEffect(() => {
+        if (!doctor?.id) return;
+
+        console.log("💬 UserChatPanel: Setting up realtime channel for doctor:", doctor.id);
+
+        // Clear notification bell for this doctor when chat is opened
+        if ((window as any).clearDoctorNotifications) {
+            (window as any).clearDoctorNotifications(doctor.id);
+        }
+
+        let channel: any = null;
+        let isSubscribed = false;
+
+        const setupChannel = () => {
+            const { createBrowserClient } = require("@supabase/ssr");
+            const supabase = createBrowserClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+            );
+
+            // Reset processed IDs
+            processedIdsRef.current = new Set();
+
+            // Create unique channel name
+            const channelName = `chat-panel-${doctor.id}-${Date.now()}`;
+
+            channel = supabase.channel(channelName);
+
+            // Listen for ALL messages and filter client-side
+            // This is needed because messages go both ways:
+            // - Patient sends: sender_id=patient, receiver_id=doctor
+            // - Doctor sends: sender_id=doctor, receiver_id=patient
+            channel.on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "chat_messages",
+                },
+                (payload: any) => {
+                    const messageId = payload.new.id;
+                    const senderId = payload.new.sender_id;
+                    const receiverId = payload.new.receiver_id;
+                    console.log("💬 UserChatPanel: Message event:", messageId, "from:", senderId, "to:", receiverId);
+
+                    // Filter: Only care about messages involving this doctor
+                    // Either doctor sent it (to patient) OR patient sent it to doctor (for confirmation)
+                    const isDoctorMessage = senderId === doctor.id; // Doctor sent to patient
+                    const isPatientToDoctor = receiverId === doctor.id; // Patient sent to doctor
+
+                    if (!isDoctorMessage && !isPatientToDoctor) {
+                        console.log("💬 UserChatPanel: Not relevant to this chat, skipping");
+                        return;
+                    }
+
+                    // Skip if already processed
+                    if (processedIdsRef.current.has(messageId)) {
+                        console.log("💬 UserChatPanel: Already processed, skipping");
+                        return;
+                    }
+
+                    processedIdsRef.current.add(messageId);
+
+                    // Create message object
+                    // If doctor is sender, it's incoming (notMine)
+                    // If patient is sender (to doctor), it's outgoing (isMine)
+                    const isMine = !isDoctorMessage;
+                    const senderName = isMine ? "Patient" : "Dr. " + doctor.name;
+
+                    const newMsg: Message = {
+                        id: messageId,
+                        senderId: senderId,
+                        senderName: senderName,
+                        senderRole: isMine ? "pasien" : "dokter",
+                        receiverId: receiverId,
+                        message: payload.new.message,
+                        isRead: payload.new.is_read,
+                        createdAt: payload.new.created_at,
+                        isMine: isMine
+                    };
+
+                    // Add to messages state
+                    setMessages(prev => {
+                        const exists = prev.some(m => m.id === messageId);
+                        if (exists) {
+                            console.log("💬 UserChatPanel: Message already in state");
+                            return prev;
+                        }
+                        console.log("💬 UserChatPanel: Adding message, isMine:", isMine);
+                        return [...prev, newMsg];
+                    });
+
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                    }, 100);
+                }
+            );
+
+            // Subscribe
+            channel.subscribe((status: string) => {
+                console.log("💬 UserChatPanel: Channel status:", status);
+                isSubscribed = status === "SUBSCRIBED";
+
+                // If subscribed, refetch messages to sync
+                if (status === "SUBSCRIBED") {
+                    console.log("💬 UserChatPanel: Connected! Syncing messages...");
+                    fetchMessages();
+                }
+            });
+
+            channelRef.current = channel;
+        };
+
+        // Small delay to avoid StrictMode issues
+        const timer = setTimeout(setupChannel, 100);
+
+        return () => {
+            clearTimeout(timer);
+            console.log("💬 UserChatPanel: Cleaning up channel");
+            if (channel) {
+                supabase.removeChannel(channel);
+            }
+            if (channelRef.current) {
+                channelRef.current = null;
+            }
+        };
+    }, [doctor?.id]);
 
     /**
      * Fetch messages dengan dokter
@@ -57,15 +191,22 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
     const fetchMessages = useCallback(async () => {
         if (!doctor) return;
 
+        setLoading(true);
         try {
             const res = await fetch(`/api/messages?doctor_id=${doctor.id}`);
             const data = await res.json();
 
             if (data.messages) {
+                // Track all fetched message IDs to avoid duplicates
+                const fetchedIds = new Set(data.messages.map((m: Message) => m.id));
+                fetchedIds.forEach(id => processedIdsRef.current.add(id));
+
                 setMessages(data.messages);
             }
         } catch (error) {
             console.error("Failed to fetch messages:", error);
+        } finally {
+            setLoading(false);
         }
     }, [doctor?.id]);
 
@@ -74,17 +215,6 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
         setMessages([]); // Reset messages when doctor changes
         fetchMessages();
     }, [doctor?.id]);
-
-    // Polling untuk real-time feel (setiap 10 detik - lebih slow)
-    useEffect(() => {
-        if (!doctor) return;
-
-        const interval = setInterval(() => {
-            fetchMessages();
-        }, 10000);
-
-        return () => clearInterval(interval);
-    }, [doctor?.id, fetchMessages]);
 
     // Auto-scroll - only on new messages or user send
     const prevMessagesLength = useRef(messages.length);
@@ -139,8 +269,17 @@ export default function UserChatPanel({ doctor, onClose }: UserChatPanelProps) {
 
             // Check if message was returned
             if (data.message) {
-                setMessages(prev => [...prev, data.message]);
-                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                const messageId = data.message.id;
+
+                // Skip if already processed via realtime
+                if (!processedIdsRef.current.has(messageId)) {
+                    processedIdsRef.current.add(messageId);
+                    setMessages(prev => {
+                        if (prev.some(m => m.id === messageId)) return prev;
+                        return [...prev, data.message];
+                    });
+                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
             } else {
                 // If no error but also no message, refetch messages
                 fetchMessages();

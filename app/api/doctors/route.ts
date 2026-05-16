@@ -19,9 +19,10 @@ export async function GET() {
         }
 
         // Get all doctors - select user_id for chat functionality
+        // Only select columns that exist in profiles table
         const { data: doctors, error: doctorsError } = await supabase
             .from("profiles")
-            .select("id, user_id, full_name, first_name, last_name, email, specialty, hospital, is_available")
+            .select("id, user_id, full_name, first_name, last_name, email, is_available")
             .eq("role", "dokter")
             .not("user_id", "is", null);
 
@@ -66,8 +67,8 @@ export async function GET() {
                 name,
                 initials,
                 email: doctor.email,
-                specialty: doctor.specialty || "Umum",
-                hospital: doctor.hospital || "RagaHarian",
+                specialty: "Umum",
+                hospital: "RagaHarian",
                 isOnline: doctor.is_available ?? true,
                 unreadMessages: unreadByDoctor[doctor.user_id] || 0,
             };

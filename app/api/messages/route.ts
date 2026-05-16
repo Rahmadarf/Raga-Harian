@@ -16,6 +16,8 @@ export async function GET(req: Request) {
     try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
+        console.log("DEBUG GET /api/messages - user:", user?.id);
+
         if (authError || !user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -23,6 +25,18 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const doctorId = searchParams.get("doctor_id");
         const limit = parseInt(searchParams.get("limit") || "50");
+
+        console.log("DEBUG - doctorId param:", doctorId);
+        console.log("DEBUG - user.id:", user.id);
+
+        // Direct query - check what messages exist for this user
+        const allForUser = await supabase
+            .from("chat_messages")
+            .select("*")
+            .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+            .limit(10);
+
+        console.log("DEBUG - All messages for user:", allForUser.data);
 
         let messages;
         let messagesError;
@@ -32,29 +46,25 @@ export async function GET(req: Request) {
             const result = await supabase
                 .from("chat_messages")
                 .select("id, sender_id, receiver_id, message, is_read, created_at")
-                .or(`and(sender_id.eq.${user.id},receiver_id.eq.${doctorId}),and(sender_id.eq.${doctorId},receiver_id.eq.${user.id})`)
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${doctorId},sender_id.eq.${doctorId},receiver_id.eq.${user.id}`)
                 .order("created_at", { ascending: true })
                 .limit(limit);
 
+            console.log("DEBUG - Query with doctor_id result:", result.data);
             messages = result.data;
             messagesError = result.error;
         } else {
             // Get all messages for this user
-            const result = await supabase
-                .from("chat_messages")
-                .select("id, sender_id, receiver_id, message, is_read, created_at")
-                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-                .order("created_at", { ascending: true })
-                .limit(limit);
-
-            messages = result.data;
-            messagesError = result.error;
+            messages = allForUser.data;
+            messagesError = allForUser.error;
         }
 
         if (messagesError) {
             console.error("Messages query error:", messagesError);
             return NextResponse.json({ error: messagesError.message }, { status: 500 });
         }
+
+        console.log("DEBUG - Final messages:", messages);
 
         // Get profiles untuk sender info - use user_id
         const senderIds = [...new Set(messages?.map(m => m.sender_id) || [])];
@@ -100,7 +110,12 @@ export async function GET(req: Request) {
         return NextResponse.json({
             success: true,
             count: formattedMessages.length,
-            messages: formattedMessages
+            messages: formattedMessages,
+            debug: {
+                userId: user.id,
+                doctorId: doctorId,
+                rawMessagesCount: messages?.length || 0
+            }
         });
 
     } catch (error) {

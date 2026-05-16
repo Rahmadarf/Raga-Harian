@@ -50,6 +50,128 @@ export default function DoctorChatPanel({ patient, onClose }: DoctorChatPanelPro
     const [showPatientInfo, setShowPatientInfo] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const channelRef = useRef<any>(null);
+    const processedIdsRef = useRef<Set<string>>(new Set());
+
+    /**
+     * Setup Supabase Realtime untuk pesan baru di sisi dokter
+     */
+    useEffect(() => {
+        if (!patient?.id) return;
+
+        console.log("🏥 DoctorChatPanel: Setting up realtime for patient:", patient.id);
+
+        let channel: any = null;
+
+        const setupChannel = () => {
+            const { createBrowserClient } = require("@supabase/ssr");
+            const supabase = createBrowserClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+            );
+
+            // Reset processed IDs
+            processedIdsRef.current = new Set();
+
+            // Create unique channel name
+            const channelName = `doctor-chat-${patient.id}-${Date.now()}`;
+
+            channel = supabase.channel(channelName);
+
+            // Listen for ALL messages involving this patient
+            // Filter client-side for both directions:
+            // - Doctor sent: sender_id=doctor, receiver_id=patient
+            // - Patient sent: sender_id=patient, receiver_id=doctor
+            channel.on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "chat_messages",
+                },
+                (payload: any) => {
+                    const messageId = payload.new.id;
+                    const senderId = payload.new.sender_id;
+                    const receiverId = payload.new.receiver_id;
+                    console.log("🏥 DoctorChatPanel: Message event:", messageId, "from:", senderId, "to:", receiverId);
+
+                    // Filter: Only messages involving this patient
+                    const isPatientMessage = senderId === patient.id || receiverId === patient.id;
+                    if (!isPatientMessage) {
+                        console.log("🏥 DoctorChatPanel: Not relevant, skipping");
+                        return;
+                    }
+
+                    // Skip if already processed
+                    if (processedIdsRef.current.has(messageId)) {
+                        console.log("🏥 DoctorChatPanel: Already processed, skipping");
+                        return;
+                    }
+
+                    processedIdsRef.current.add(messageId);
+
+                    // Determine if this message is from doctor (sent) or from patient (received)
+                    // We need the doctor_id from somewhere - we'll check from API response
+                    // For now, if sender is NOT patient.id, it's a sent message from doctor
+                    const isMine = senderId !== patient.id;
+                    const senderName = isMine ? "Dr. Anda" : patient.name;
+
+                    const newMsg: Message = {
+                        id: messageId,
+                        senderId: senderId,
+                        senderName: senderName,
+                        senderRole: isMine ? "dokter" : "pasien",
+                        receiverId: receiverId,
+                        message: payload.new.message,
+                        isRead: payload.new.is_read,
+                        createdAt: payload.new.created_at,
+                        isMine: isMine
+                    };
+
+                    // Add to messages state
+                    setMessages(prev => {
+                        const exists = prev.some(m => m.id === messageId);
+                        if (exists) {
+                            console.log("🏥 DoctorChatPanel: Message already in state");
+                            return prev;
+                        }
+                        console.log("🏥 DoctorChatPanel: Adding message, isMine:", isMine);
+                        return [...prev, newMsg];
+                    });
+
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                    }, 100);
+                }
+            );
+
+            // Subscribe
+            channel.subscribe((status: string) => {
+                console.log("🏥 DoctorChatPanel: Channel status:", status);
+                if (status === "SUBSCRIBED") {
+                    console.log("🏥 DoctorChatPanel: Connected! Syncing messages...");
+                    fetchMessages();
+                }
+            });
+
+            channelRef.current = channel;
+        };
+
+        // Small delay to avoid StrictMode issues
+        const timer = setTimeout(setupChannel, 100);
+
+        return () => {
+            clearTimeout(timer);
+            console.log("🏥 DoctorChatPanel: Cleaning up channel");
+            if (channel) {
+                supabase.removeChannel(channel);
+            }
+            if (channelRef.current) {
+                channelRef.current = null;
+            }
+        };
+    }, [patient?.id]);
 
     /**
      * Fetch messages untuk patient
@@ -63,6 +185,10 @@ export default function DoctorChatPanel({ patient, onClose }: DoctorChatPanelPro
             const data = await res.json();
 
             if (data.messages) {
+                // Track fetched IDs
+                const fetchedIds = new Set(data.messages.map((m: Message) => m.id));
+                fetchedIds.forEach(id => processedIdsRef.current.add(id));
+
                 setMessages(data.messages);
             }
         } catch (error) {
@@ -70,12 +196,13 @@ export default function DoctorChatPanel({ patient, onClose }: DoctorChatPanelPro
         } finally {
             setLoading(false);
         }
-    }, [patient]);
+    }, [patient?.id]);
 
     // Fetch messages on mount and when patient changes
     useEffect(() => {
+        setMessages([]); // Reset messages
         fetchMessages();
-    }, [fetchMessages]);
+    }, [patient?.id]);
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
