@@ -1,14 +1,11 @@
 // user-dashboard.tsx
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-    LayoutGrid, Activity, Droplets, Calendar, MessageSquare, History,
+    LayoutGrid, Activity, Droplets, MessageSquare, User, Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
 import { useDashboard } from "@/context/DashboardProvider";
 import MiniProfile from "../miniProfile";
 
@@ -16,21 +13,22 @@ const navItems = [
     { id: "dashboard", icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
     { id: "aktivitas", icon: Activity, href: "/dashboard/aktivitas", label: "Aktivitas" },
     { id: "nutrisi", icon: Droplets, href: "/dashboard/nutrisi", label: "Nutrisi" },
+    { id: "achievements", icon: Trophy, href: "/dashboard/achievements", label: "Achievement" },
     { id: "konsultasi", icon: MessageSquare, href: "/dashboard/konsultasi", label: "Konsultasi" },
+    { id: "profile", icon: User, href: "/dashboard/profile", label: "Profil" },
 ];
 
 export default function UserSidebar() {
     const url = usePathname();
-    const goTo = useRouter()
+    const goTo = useRouter();
     const supabase = createClient();
     const { user, loading } = useDashboard();
-
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         goTo.push("/");
         goTo.refresh();
-    }
+    };
 
     return (
         <aside className="fixed top-0 left-0 h-screen w-[220px] bg-secondary border-r border-neutral-100 dark:border-white/[0.06] flex flex-col px-3 py-5 z-50">

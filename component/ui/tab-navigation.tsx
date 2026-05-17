@@ -47,8 +47,9 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
 
     return (
         <div className="mb-6">
-            {/* Tab Container */}
-            <div className="bg-white rounded-2xl p-1.5 border border-[#EEF2F7] inline-flex overflow-x-auto">
+            {/* Tab Container - scrollable on mobile */}
+            <div className="bg-white rounded-2xl p-1.5 border border-[#EEF2F7] overflow-x-auto -mx-3 px-3 sm:overflow-visible sm:mx-0 sm:px-0">
+                <div className="inline-flex min-w-max sm:min-w-0">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = tab.id === activeTab;
@@ -57,13 +58,13 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
                         <button
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
-                            className={`relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
+                            className={`relative px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                                 isActive
                                     ? "text-white z-10"
                                     : "text-[#64748B] hover:text-[#1E293B] hover:bg-[#F8FAFC]"
                             }`}
                         >
-                            <Icon className="w-4 h-4" />
+                            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             <span>{tab.label}</span>
 
                             {/* Active indicator background */}
@@ -78,10 +79,11 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
                         </button>
                     );
                 })}
+                </div>
             </div>
 
-            {/* Active Tab Line Indicator */}
-            <div className="mt-3 h-0.5 bg-[#F1F5F9] rounded-full overflow-hidden relative">
+            {/* Active Tab Line Indicator - hide on small screens */}
+            <div className="mt-3 h-0.5 bg-[#F1F5F9] rounded-full overflow-hidden relative hidden sm:block">
                 <motion.div
                     className="h-full rounded-full absolute top-0"
                     initial={{ width: "16.67%", left: "0%" }}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { Target, TrendingUp, Droplets, Footprints, Award, Plus } from "lucide-react";
+import { Target, TrendingUp, Droplets, Footprints, Award, Plus, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { triggerDashboardRefresh } from "@/hooks/use-dashboard-data";
@@ -35,7 +35,13 @@ interface Goal {
 interface Achievement {
     id: string;
     title: string;
+    description?: string;
+    icon?: string;
     color: string;
+    requirement?: string;
+    category?: string;
+    earned?: boolean;
+    earnedAt?: string | null;
 }
 
 export default function GoalCard() {
@@ -220,14 +226,17 @@ export default function GoalCard() {
                             {achievements.slice(0, 5).map((achievement) => (
                                 <div
                                     key={achievement.id}
-                                    className="flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center"
+                                    className="flex-shrink-0 w-16 h-16 rounded-2xl flex flex-col items-center justify-center gap-1 relative"
                                     style={{ backgroundColor: `${achievement.color}20` }}
                                     title={achievement.title}
                                 >
-                                    <Award
-                                        className="w-8 h-8"
-                                        style={{ color: achievement.color }}
-                                    />
+                                    <span className="text-xl">{achievement.icon}</span>
+                                    <div
+                                        className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                                        style={{ backgroundColor: achievement.color }}
+                                    >
+                                        <Check className="w-2.5 h-2.5 text-white" />
+                                    </div>
                                 </div>
                             ))}
                         </div>

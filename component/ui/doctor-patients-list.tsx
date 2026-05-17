@@ -27,6 +27,9 @@ interface Patient {
     height: number | null;
     waterToday: number;
     caloriesToday: number;
+    proteinToday: number;
+    carbsToday: number;
+    fatsToday: number;
     exerciseMinutesToday: number;
     unreadMessages: number;
     status: string;

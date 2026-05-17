@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { LogOut, Settings, User, ChevronDown } from "lucide-react";
+import { LogOut, Settings, User, ChevronDown, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useDashboard } from "@/context/DashboardProvider";
@@ -17,9 +17,12 @@ interface TopBarProps {
 const TopBar = ({ title, subtitle }: TopBarProps) => {
     const url = usePathname();
     const router = useRouter();
-    const { loading, user } = useDashboard()
+    const { loading, user, role } = useDashboard()
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    // Check if user is a patient (for conditional menu items)
+    const isPatient = role === 'pasien';
 
     const initials = user?.fullName
         ?.split(" ")
@@ -55,10 +58,10 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-between mb-7 animate-pulse">
+            <div className="flex items-center justify-between mb-5 sm:mb-7 animate-pulse">
                 <div>
-                    <div className="h-7 w-48 bg-neutral-200 rounded-lg mb-2" />
-                    <div className="h-4 w-36 bg-neutral-100 rounded-md" />
+                    <div className="h-6 w-40 sm:h-7 sm:w-48 bg-neutral-200 rounded-lg mb-2" />
+                    <div className="h-4 w-32 sm:w-36 bg-neutral-100 rounded-md hidden sm:block" />
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="w-[38px] h-[38px] rounded-[10px] bg-neutral-100 border border-neutral-50" />
@@ -69,15 +72,16 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
     }
 
     return (
-        <div className="flex items-center justify-between mb-7">
-            <div>
+        <div className="flex items-start sm:items-center justify-between mb-5 sm:mb-7">
+            <div className="flex-1 min-w-0">
                 <div
-                    className="text-[22px] font-bold text-gray-800"
+                    className="text-lg sm:text-[22px] font-bold text-gray-800 truncate"
                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
                     {title}
                 </div>
-                <div className="text-[13px] text-text-secondary mt-0.5">{today} · {subtitle}</div>
+                <div className="text-[11px] sm:text-[13px] text-text-secondary mt-0.5 hidden sm:block">{today} · {subtitle}</div>
+                <div className="text-[11px] sm:text-[13px] text-text-secondary mt-0.5 sm:hidden">{subtitle}</div>
             </div>
             <div className="flex items-center gap-3">
                 <NotificationBell />
@@ -119,10 +123,22 @@ const TopBar = ({ title, subtitle }: TopBarProps) => {
 
                                 {/* Menu Items */}
                                 <div className="py-2">
-                                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] transition-colors">
+                                    <button
+                                        onClick={() => router.push("/dashboard/profile")}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] transition-colors"
+                                    >
                                         <User className="w-4 h-4" />
                                         Profil Saya
                                     </button>
+                                    {isPatient && (
+                                        <button
+                                            onClick={() => router.push("/dashboard/achievements")}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] transition-colors"
+                                        >
+                                            <Trophy className="w-4 h-4" />
+                                            Achievement
+                                        </button>
+                                    )}
                                     <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] transition-colors">
                                         <Settings className="w-4 h-4" />
                                         Pengaturan

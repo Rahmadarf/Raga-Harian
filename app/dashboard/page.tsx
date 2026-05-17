@@ -120,7 +120,7 @@ const HealthDashboard: React.FC = () => {
         <div className="flex min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Rubik', sans-serif" }}>
 
             {/* Main Content */}
-            <div className="flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto px-6 py-6">
+            <div className="flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
 
                 {/* Topbar */}
                 <TopBar title={`Selamat pagi, ${user?.fullName ?? ""}`} subtitle="Kondisi kamu hari ini terlihat bagus!" />
@@ -149,7 +149,7 @@ const HealthDashboard: React.FC = () => {
                             />
 
                             {/* Quick Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                                 <div className="bg-white rounded-2xl p-4 border border-[#EEF2F7]">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="w-8 h-8 rounded-lg bg-[#00A8A8]/10 flex items-center justify-center">
